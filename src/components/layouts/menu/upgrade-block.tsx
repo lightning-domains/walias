@@ -16,11 +16,11 @@ export default function UpgradeBlock({ isLoading }: { isLoading?: boolean }) {
       <CardHeader>
         <CardTitle>Upgrade to Pro</CardTitle>
         <CardDescription>
-          Unlock all features and get unlimited access to our support team.
+          Soon you&apos;ll be able to unlock new special features.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Button size='sm' className='w-full'>
+        <Button disabled={true} size='sm' className='w-full'>
           Upgrade
         </Button>
       </CardContent>
