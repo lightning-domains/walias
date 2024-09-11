@@ -24,4 +24,9 @@ export interface WalletProvider {
   setupComponent?: ComponentType<SetupComponentProps>;
 }
 
-export type WalletCategory = "exchange" | "wallet" | "protocol" | "swap";
+export type WalletCategory =
+  | "exchange"
+  | "wallet"
+  | "protocol"
+  | "swap"
+  | "unknown";
