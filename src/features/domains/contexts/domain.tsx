@@ -62,9 +62,9 @@ export function DomainProvider({ children }: DomainProviderProps) {
 
       if (currentDomainIndex === -1) {
         console.info("Domain not found, adding new domain");
-        domainList.push({ ...domain, isAdmin, handles: [handle] });
+        domainList.push({ ...domain, isAdmin, waliases: [handle] });
       } else {
-        const handleExist = domainList[currentDomainIndex].handles.findIndex(
+        const handleExist = domainList[currentDomainIndex].waliases.findIndex(
           (h) => h === handle
         );
         if (handleExist) {
@@ -72,7 +72,7 @@ export function DomainProvider({ children }: DomainProviderProps) {
           return;
         }
         console.info("Pushing handle...");
-        domainList[currentDomainIndex].handles.push(handle);
+        domainList[currentDomainIndex].waliases.push(handle);
       }
       setDomainList([...domainList]);
     },

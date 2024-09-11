@@ -64,7 +64,7 @@ export default function DangerZone({ domain }: { domain: DomainItem }) {
   };
 
   useEffect(() => {
-    setAliases(domain.handles || []);
+    setAliases(domain.waliases || []);
     setSelectedAliases([]);
   }, [domain]);
 
