@@ -1,4 +1,6 @@
-# Lightning Domain
+![walias-cover](./docs/assets/cover.jpg)
+
+# Walias
 
 Provide Lightning Address and Nostr functionality to your domain without coding.
 
