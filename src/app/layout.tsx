@@ -11,8 +11,8 @@ const fontSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Lightning Domain",
-  description: "Create your own Lightning Domain",
+  title: "Walias.io",
+  description: "Manage your Lightning Domains",
 };
 
 export default function RootLayout({
