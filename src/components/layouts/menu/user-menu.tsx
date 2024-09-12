@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { CircleUser, Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useCallback } from "react";
-import Link from "next/link";
 
 export default function UserMenu() {
   const router = useRouter();
@@ -28,7 +27,7 @@ export default function UserMenu() {
   const handleLogout = useCallback(() => {
     logout();
     router.push("/admin");
-  }, [logout]);
+  }, [logout, router]);
 
   return (
     <DropdownMenu>
