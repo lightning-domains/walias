@@ -7,6 +7,7 @@ import WaliasesList from "@/features/waliases/components/waliases-list";
 import useDomains from "@/features/domains/hooks/use-domains";
 import NoWalias from "@/features/waliases/components/no-walias";
 import waliases from "@/mocks/waliases";
+import AddWaliasDialog from "@/features/waliases/components/add-walias-dialog";
 
 export default function WaliasPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +23,10 @@ export default function WaliasPage() {
 
   return (
     <>
+      <AddWaliasDialog
+        open={isModalOpen}
+        onOpenChange={() => setIsModalOpen(false)}
+      />
       <div className='flex items-center justify-between'>
         <h1 className='text-lg font-semibold md:text-2xl'>
           Walias @{currentDomain.name}
