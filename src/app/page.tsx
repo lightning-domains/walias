@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+import Logo from "@/components/shared/logo/logo";
 
 export default function Home() {
   const router = useRouter();
@@ -36,7 +37,11 @@ export default function Home() {
   return (
     <div className='flex flex-col min-h-dvh'>
       <main className='flex-1 main-bg'>
-        <section className='w-full py-24 md:py-32 lg:py-48 border-y'>
+        <section className='w-full py-12 md:py-20 lg:py-24 border-y'>
+          <div className='flex justify-center items-center mb-6 md:mb-12 lg:mb-24'>
+            <Logo />
+          </div>
+
           <div className='container px-4 md:px-6 space-y-10 xl:space-y-16'>
             <div className='grid max-w-[1300px] mx-auto gap-4 px-4 sm:px-6 md:px-10 md:grid-cols-2 md:gap-16'>
               <div>
