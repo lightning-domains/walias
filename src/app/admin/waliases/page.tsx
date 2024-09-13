@@ -26,6 +26,7 @@ export default function WaliasPage() {
       <AddWaliasDialog
         open={isModalOpen}
         onOpenChange={() => setIsModalOpen(false)}
+        domain={currentDomain}
       />
       <div className='flex items-center justify-between'>
         <h1 className='text-lg font-semibold md:text-2xl'>
@@ -36,6 +37,7 @@ export default function WaliasPage() {
             size='sm'
             className='h-8 gap-1'
             onClick={() => setIsModalOpen(true)}
+            disabled={!currentDomain.apiEndpoint}
           >
             <PlusCircle className='h-3.5 w-3.5' />
             <span className='sr-only sm:not-sr-only sm:whitespace-nowrap'>

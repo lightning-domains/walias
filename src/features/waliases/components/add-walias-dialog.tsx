@@ -11,17 +11,20 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { DomainItem } from "@/types/domain";
 
 type HandleStatus = "TAKEN" | "YOURS" | "AVAILABLE" | null;
 
 export interface AddWaliasDialog {
   open: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  domain: DomainItem;
 }
 
 export default function AddWaliasDialog({
   open,
   onOpenChange,
+  domain,
 }: AddWaliasDialog) {
   const [handle, setHandle] = useState("");
   const [status, setStatus] = useState<HandleStatus>(null);
@@ -83,9 +86,9 @@ export default function AddWaliasDialog({
       case "TAKEN":
         return "Try Another";
       case "YOURS":
-        return "Add Walias";
+        return "Add walias";
       case "AVAILABLE":
-        return "Claim";
+        return "Claim walias";
       default:
         return "Check Availability";
     }
@@ -95,7 +98,7 @@ export default function AddWaliasDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>Choose your wallet alias</DialogTitle>
+          <DialogTitle>Add walias from {domain.title}</DialogTitle>
         </DialogHeader>
         <div className='grid gap-2 py-2'>
           <div className='grid grid-cols-4 items-center gap-4'>
@@ -107,7 +110,7 @@ export default function AddWaliasDialog({
                 placeholder='Enter your handle'
               />
               <span className='inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm'>
-                @lacrypta
+                {domain.name}
               </span>
             </div>
           </div>
