@@ -52,7 +52,12 @@ export default function WaliasesList({ domain }: WaliasesListProps) {
         <TableBody>
           {waliases.map((walias, index) => (
             <TableRow key={index}>
-              <TableCell className='font-medium'>{walias.name}</TableCell>
+              <TableCell className='font-medium'>
+                {walias.name}
+                <span className='text-slate-300 italic hidden lg:inline'>
+                  @{domain}
+                </span>
+              </TableCell>
               <TableCell>
                 <Tooltip>
                   {walias.nip05 ? (
