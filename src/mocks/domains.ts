@@ -6,6 +6,7 @@ export default [
     name: "lacrypta.ar",
     logo: "https://pbs.twimg.com/profile_images/1755606302951411712/5HjGkdHm_400x400.jpg",
     waliases: ["joje"],
+    apiEndpoint: "https://walias.io/api",
     isAdmin: true,
   },
   {
