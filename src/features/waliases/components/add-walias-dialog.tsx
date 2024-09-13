@@ -100,21 +100,19 @@ export default function AddWaliasDialog({
         <DialogHeader>
           <DialogTitle>Add walias from {domain.title}</DialogTitle>
         </DialogHeader>
-        <div className='grid gap-2 py-2'>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <div className='col-span-4 flex'>
-              <Input
-                className='flex-1 rounded-r-none'
-                value={handle}
-                onChange={(e) => setHandle(e.target.value)}
-                placeholder='Enter your handle'
-              />
-              <span className='inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm'>
-                {domain.name}
-              </span>
-            </div>
+        <div className='flex flex-col gap-2'>
+          <div className='col-span-4 flex'>
+            <Input
+              className='flex-1 rounded-r-none'
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              placeholder='Enter your handle'
+            />
+            <span className='inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm'>
+              {domain.name}
+            </span>
           </div>
-          <div className='relative min-h-[5rem] transition-all duration-300 ease-in-out'>
+          <div className='relative min-h-[5rem] transition-all duration-300 ease-in-out mt-2'>
             <div
               className={`absolute inset-0 flex justify-center items-center transition-opacity duration-300 ${
                 isLoading || !status ? "opacity-100" : "opacity-0"
@@ -131,7 +129,7 @@ export default function AddWaliasDialog({
             </div>
           </div>
         </div>
-        <div className='flex justify-end mt-2'>
+        <div className='flex justify-end'>
           <Button
             type='button'
             disabled={
