@@ -46,8 +46,8 @@ const menuItems: MenuItem[] = [
   },
   {
     icon: WebhookIcon,
-    title: "Webhooks",
-    href: `${ADMIN_PREFIX}/webhooks`,
+    title: "Triggers",
+    href: `${ADMIN_PREFIX}/triggers`,
     disabled: true,
     isAdmin: true,
   },
