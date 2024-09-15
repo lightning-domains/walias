@@ -14,7 +14,9 @@ export default function WaliasSettingsPage() {
   return (
     <>
       <div className='flex items-center'>
-        <h1 className='text-lg font-semibold md:text-2xl'>Walias settings</h1>
+        <h1 className='text-lg font-semibold md:text-2xl'>
+          Walias settings for {walias}@{currentDomain.name}
+        </h1>
       </div>
       <div className='flex flex-1 rounded-lg border border-dashed shadow-sm w-full pt-4'>
         <WaliasSettings walias={walias as string} domain={currentDomain} />

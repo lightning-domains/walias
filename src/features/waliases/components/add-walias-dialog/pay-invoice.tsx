@@ -42,9 +42,9 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
   return (
     <div className='flex items-center justify-center p-4'>
       <div className='w-full max-w-4xl'>
-        <div className='pb-4'>
+        <div className='pb-8'>
           <div className='text-2xl font-bold text-center'>
-            Buy walias from {domain.title}
+            Buy {walias}@{domain.name}
           </div>
         </div>
         <div className='space-y-4 md:flex md:gap-8'>
@@ -79,16 +79,22 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
                   size='sm'
                   className='z-10'
                 >
-                  Generar factura
+                  Generar invoice
                 </Button>
               </div>
             </div>
-            <div className='flex justify-center items-center space-x-2 text-orange-500'>
-              <Clock className='h-5 w-5' />
-              <span className='text-lg font-semibold'>
-                Expires in: {formatTime(timeLeft)}
-              </span>
-            </div>
+            {payReq ? (
+              <div className='flex justify-center items-center space-x-2 text-orange-500'>
+                <Clock className='h-5 w-5' />
+                <span className='text-base font-semibold'>
+                  Expires in: {formatTime(timeLeft)}
+                </span>
+              </div>
+            ) : (
+              <div className='flex justify-center items-center'>
+                Click on <b>Generate Invoice</b>, inside the QR.
+              </div>
+            )}
             <Button
               className='w-full text-lg'
               size='lg'

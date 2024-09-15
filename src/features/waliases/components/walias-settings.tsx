@@ -3,11 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, RefreshCw, Trash2 } from "lucide-react";
+import { AtSignIcon, RefreshCw, Trash2, Unlink } from "lucide-react";
 import { DomainItem } from "@/types/domain";
 import { useProfile } from "nostr-hooks";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Link from "next/link";
 
 type ProviderKey = "alby" | "laWallet" | "lndHub";
 
@@ -63,24 +66,51 @@ export default function WaliasSettings({
     <div className='container p-6 space-y-6 bg-background rounded-lg shadow-md mx-auto max-w-[600px] items-center flex flex-col'>
       <div className='flex flex-col items-center space-y-4'>
         <div className='flex justify-center items-center space-x-4'>
-          <Avatar className='h-20 w-20'>
-            <AvatarImage src={profile?.image || ""} alt='Avatar 1' />
-            <AvatarFallback>A1</AvatarFallback>
-          </Avatar>
-          <PlusIcon className='h-8 w-8 text-primary' />
-          <Avatar className='h-20 w-20'>
-            <AvatarImage src={domain.logo} alt='Avatar 2' />
-            <AvatarFallback>A2</AvatarFallback>
-          </Avatar>
+          <div className='rounded-full p-2 bg-white shadow-xl'>
+            <Avatar className='h-20 w-20'>
+              <AvatarImage src={profile?.image || ""} alt='Avatar 1' />
+              <AvatarFallback>A1</AvatarFallback>
+            </Avatar>
+          </div>
+          <AtSignIcon className='h-14 w-14 text-primary p-2 bg-white dark:bg-black shadow-2xl dark:drop-shadow-[0_10px_50px_rgba(255,255,255,1)] rounded-full' />
+          <div className='rounded-full p-2 bg-white shadow-xl'>
+            <Avatar className='h-20 w-20'>
+              <AvatarImage src={domain.logo} alt='Avatar 2' />
+              <AvatarFallback>A2</AvatarFallback>
+            </Avatar>
+          </div>
         </div>
-        <span className='text-3xl font-bold text-primary'>
-          {walias}@{domain.name}
-        </span>
+
+        <div className='flex flex-col items-center px-4 py-2 gap-2'>
+          <div className='text-2xl font-bold text-primary'>
+            {walias}@{domain.name}
+          </div>
+          <div className='border-t-2 drop-shadow-lg w-full m-auto h-2 px-12'></div>
+        </div>
       </div>
+
+      <Alert>
+        <Unlink className='h-6 w-6' />
+        <div className='ml-2'>
+          <AlertTitle>Not a Lightning Domain</AlertTitle>
+          <AlertDescription>
+            <p>
+              <b>{domain.title}</b> needs to implement Lightning Domains to
+              enable Wallet Providers. .
+            </p>
+            <p>
+              <Badge variant='default'>Learn More</Badge>
+            </p>
+          </AlertDescription>
+        </div>
+      </Alert>
 
       <div className='space-y-4 w-full max-w-[400px]'>
         <h3 className='text-lg font-semibold text-foreground'>
-          Wallet Providers
+          Wallet Providers{" "}
+          <Link href={"/admin/settings/providers"}>
+            <Badge>Edit</Badge>
+          </Link>
         </h3>
         <div className='flex items-center justify-between pb-2 border-b'>
           <Label
