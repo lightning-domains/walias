@@ -137,55 +137,65 @@ export default function AddWaliasDialog({
           {status === "CLAIMING" ? (
             <ClaimDomain domain={domain} walias={walias} />
           ) : (
-            <>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleNext();
+              }}
+            >
               <DialogHeader>
                 <DialogTitle className='text-lg mt-2 mb-6'>
-                  Add walias from {domain.title}
+                  Add walias at {domain.title}
                 </DialogTitle>
               </DialogHeader>
               <div className='flex flex-col gap-2'>
-                <div className='col-span-4 flex px-1'>
+                <div className='col-span-4 flex px-1 relative mb-4'>
                   <Input
-                    className='flex-1 rounded-r-none'
+                    className='flex-1 rounded-r-none text-lg'
                     value={walias}
                     onChange={(e) => setWalias(e.target.value)}
                     placeholder='Enter your walias'
                   />
-                  <span className='inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm'>
-                    {domain.name}
+                  <span className='absolute z-10 right-0 top-0 bottom-0 inline-flex px-4 mr-1 rounded-r-md border  border-gray-300 bg-gray-50 text-gray-500 text-lg flex-col items-center justify-center'>
+                    @{domain.name}
                   </span>
                 </div>
-                <div className='relative min-h-[5rem] transition-all duration-300 ease-in-out mt-2'>
-                  <div
-                    className={`absolute inset-0 flex justify-center items-center transition-opacity duration-300 ${
-                      isLoading || !status ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    {isLoading && <Loader2 className='animate-spin h-5 w-5' />}
+                {status !== null && (
+                  <div className='relative min-h-[5rem] transition-all duration-300 ease-in-out mt-2'>
+                    <div
+                      className={`absolute inset-0 flex justify-center items-center transition-opacity duration-300 ${
+                        isLoading || !status ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      {isLoading && (
+                        <Loader2 className='animate-spin h-5 w-5' />
+                      )}
+                    </div>
+                    <div
+                      className={`transition-opacity duration-300 ${
+                        !isLoading && status ? "opacity-100" : "opacity-0"
+                      }`}
+                    >
+                      {getStatusAlert()}
+                    </div>
                   </div>
-                  <div
-                    className={`transition-opacity duration-300 ${
-                      !isLoading && status ? "opacity-100" : "opacity-0"
-                    }`}
-                  >
-                    {getStatusAlert()}
-                  </div>
-                </div>
+                )}
               </div>
               <div className='flex justify-end'>
-                <Button
-                  type='button'
-                  disabled={
-                    !walias ||
-                    isLoading ||
-                    (status !== "AVAILABLE" && status !== "YOURS")
-                  }
-                  onClick={handleNext}
-                >
-                  {isLoading ? "Checking..." : getButtonLabel()}
-                </Button>
+                {walias && (
+                  <Button
+                    type='submit'
+                    disabled={
+                      !walias ||
+                      isLoading ||
+                      (status !== "AVAILABLE" && status !== "YOURS")
+                    }
+                  >
+                    {isLoading ? "Checking..." : getButtonLabel()}
+                  </Button>
+                )}
               </div>
-            </>
+            </form>
           )}
         </ScrollArea>
       </DialogContent>
