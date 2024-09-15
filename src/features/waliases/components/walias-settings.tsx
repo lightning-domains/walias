@@ -76,14 +76,14 @@ export default function WaliasSettings({
     <div className='container p-6 space-y-6 bg-background rounded-lg shadow-md mx-auto max-w-[600px] items-center flex flex-col'>
       <div className='flex flex-col items-center space-y-4'>
         <div className='flex justify-center items-center space-x-4'>
-          <div className='rounded-full p-2 bg-white shadow-xl'>
+          <div className='rounded-full p-2 bg-white dark:bg-blue-950 shadow-xl'>
             <Avatar className='h-20 w-20'>
               <AvatarImage src={profile?.image || ""} alt='Avatar 1' />
               <AvatarFallback>A1</AvatarFallback>
             </Avatar>
           </div>
-          <AtSignIcon className='stroke-blue-500 h-14 w-14 text-primary p-2 bg-white dark:bg-black shadow-2xl dark:drop-shadow-[0_10px_50px_rgba(255,255,255,1)] rounded-full' />
-          <div className='rounded-full p-2 bg-white shadow-xl'>
+          <AtSignIcon className='stroke-blue-500 h-14 w-14 text-primary p-2 bg-white dark:bg-blue-950 shadow-2xl dark:drop-shadow-[0_10px_50px_rgba(100,100,100,0.7)] rounded-full' />
+          <div className='rounded-full p-2 bg-white dark:bg-blue-950 shadow-xl'>
             <Avatar className='h-20 w-20'>
               <AvatarImage src={domain.logo} alt='Avatar 2' />
               <AvatarFallback>A2</AvatarFallback>
@@ -92,7 +92,7 @@ export default function WaliasSettings({
         </div>
 
         <div className='flex flex-col items-center px-4 py-2 gap-2'>
-          <div className='text-2xl font-bold text-primary'>
+          <div className='text-2xl font-bold'>
             {walias}
             <span className='text-blue-500'>@</span>
             <span className='text-gray-500'>{domain.name}</span>
