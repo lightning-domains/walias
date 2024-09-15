@@ -31,12 +31,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 export interface WaliasesListProps {
   domain: string;
 }
 
 export default function WaliasesList({ domain }: WaliasesListProps) {
+  const router = useRouter();
   return (
     <Table>
       <TooltipProvider>
@@ -52,7 +54,10 @@ export default function WaliasesList({ domain }: WaliasesListProps) {
         <TableBody>
           {waliases.map((walias, index) => (
             <TableRow key={index}>
-              <TableCell className='font-medium'>
+              <TableCell
+                className='font-medium cursor-pointer hover:-translate-y-0.5 transition-transform'
+                onClick={() => router.push(`/admin/waliases/${walias.name}`)}
+              >
                 {walias.name}
                 <span className='text-slate-300 italic hidden lg:inline'>
                   @{domain}
@@ -134,7 +139,11 @@ export default function WaliasesList({ domain }: WaliasesListProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router.push(`/admin/waliases/${walias.name}`)
+                      }
+                    >
                       <Edit className='mr-2 h-4 w-4' />
                       <span>Edit</span>
                     </DropdownMenuItem>
