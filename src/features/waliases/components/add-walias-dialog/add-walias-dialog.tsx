@@ -10,12 +10,14 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { Loader2, AlertCircle, XCircle, Trophy, Sparkles } from "lucide-react";
 import { DomainItem } from "@/types/domain";
 import ClaimDomain from "./claim-domain";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type HandleStatus = "TAKEN" | "YOURS" | "AVAILABLE" | "CLAIMING" | null;
 
@@ -84,13 +86,31 @@ export default function AddWaliasDialog({
         );
       case "AVAILABLE":
         return (
-          <Alert variant='default' className='border-green-500 text-green-700'>
-            <CheckCircle2 className='h-4 w-4' />
-            <AlertTitle>Available</AlertTitle>
-            <AlertDescription>
-              This walias is available. You can claim it now.
-            </AlertDescription>
-          </Alert>
+          <div className='flex flex-col items-center justify-center py-6'>
+            <div className='rounded-full p-2 bg-white shadow-xl mb-4'>
+              <Avatar className='h-20 w-20'>
+                <AvatarImage src={domain.logo || ""} alt={domain.title} />
+                <AvatarFallback>
+                  {domain.title.substring(0, 1).toLocaleUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <h2 className='text-2xl text-center mb-2'>
+              <b>{walias}</b>
+              <span className='text-blue-500'>@</span>
+              <b>{domain.name}</b> is available!
+            </h2>
+            <p className='text-center mb-4'>
+              Congratulations, the walias <b>{walias}</b> is free to claim!
+              <p>
+                You can instantly <b>Claim Walias</b>!
+              </p>
+            </p>
+            <Sparkles className='h-8 w-8 text-purple-500 mb-4' />
+            <p className='text-sm text-center text-gray-500'>
+              Make it yours for <Badge>300 sats</Badge>
+            </p>
+          </div>
         );
       default:
         return null;

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Clock, Bitcoin, QrCode } from "lucide-react";
 import { DomainItem } from "@/types/domain";
 import { useRouter } from "next/navigation";
+import { useProfile } from "nostr-hooks";
+import { useAuth } from "@/hooks/use-auth";
 
 export interface PayInvoiceProps {
   domain: DomainItem;
@@ -15,6 +17,8 @@ export interface PayInvoiceProps {
 export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
   const [payReq, setPayReq] = useState<string>();
+  const { userPubkey } = useAuth();
+  const { profile } = useProfile({ pubkey: userPubkey! });
   const router = useRouter();
 
   useEffect(() => {
@@ -50,15 +54,30 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
         <div className='space-y-4 md:flex md:gap-8'>
           <div className='md:w-1/2 space-y-4'>
             <div className='flex flex-col items-center space-y-2'>
-              <Image
-                src={domain.logo}
-                alt='Domain Avatar'
-                width={100}
-                height={100}
-                className='rounded-full'
-              />
+              <div className='relative z-20'>
+                <div className='relative rounded-full p-2 bg-white shadow-xl z-10'>
+                  <Image
+                    src={profile?.image || ""}
+                    alt='Domain Avatar'
+                    width={100}
+                    height={100}
+                    className='rounded-full relative z-50'
+                  />
+                </div>
+
+                <div className='rounded-full bottom-0 right-0 absolute translate-x-[20%] translate-y-[20%] p-1 bg-white shadow-xl z-10'>
+                  <Image
+                    src={domain.logo}
+                    alt='Domain Avatar'
+                    width={50}
+                    height={50}
+                    className='rounded-full relative z-30'
+                  />
+                </div>
+              </div>
               <span className='text-lg font-medium'>
-                agustin@<span className='text-gray-500'>gorila</span>
+                agustin<span className='text-blue-500'>@</span>
+                <span className='text-gray-500'>gorila</span>
               </span>
             </div>
             <div className='flex flex-col items-center space-y-1'>
