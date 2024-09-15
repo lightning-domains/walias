@@ -7,6 +7,7 @@ import { PlusIcon, RefreshCw, Trash2 } from "lucide-react";
 import { DomainItem } from "@/types/domain";
 import { useProfile } from "nostr-hooks";
 import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
 
 type ProviderKey = "alby" | "laWallet" | "lndHub";
 
@@ -22,9 +23,9 @@ export default function WaliasSettings({
   const { profile } = useProfile({ pubkey: userPubkey! });
 
   const [providers, setProviders] = useState({
-    alby: false,
-    laWallet: false,
-    lndHub: false,
+    alby: true,
+    laWallet: true,
+    lndHub: true,
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -59,7 +60,7 @@ export default function WaliasSettings({
   };
 
   return (
-    <div className='p-6 space-y-6 bg-background rounded-lg shadow-md max-w-md mx-auto'>
+    <div className='container p-6 space-y-6 bg-background rounded-lg shadow-md mx-auto max-w-[600px] items-center flex flex-col'>
       <div className='flex flex-col items-center space-y-4'>
         <div className='flex justify-center items-center space-x-4'>
           <Avatar className='h-20 w-20'>
@@ -77,50 +78,75 @@ export default function WaliasSettings({
         </span>
       </div>
 
-      <div className='space-y-4'>
+      <div className='space-y-4 w-full max-w-[400px]'>
         <h3 className='text-lg font-semibold text-foreground'>
           Wallet Providers
         </h3>
         <div className='flex items-center justify-between pb-2 border-b'>
           <Label
             htmlFor='enable-all'
-            className='text-base font-semibold cursor-pointer'
+            className={cn(
+              "font-semibold cursor-pointer text-base",
+              !allEnabled && "text-slate-400"
+            )}
           >
             Enable All
           </Label>
           <Switch
             id='enable-all'
             checked={allEnabled}
+            disabled={isUpdating || isRemoving}
             onCheckedChange={() => handleToggle("all")}
           />
         </div>
         <div className='flex items-center justify-between'>
-          <Label htmlFor='alby' className='text-base cursor-pointer'>
+          <Label
+            htmlFor='alby'
+            className={cn(
+              "text-base cursor-pointer",
+              !providers.alby && "text-slate-400"
+            )}
+          >
             Alby
           </Label>
           <Switch
             id='alby'
             checked={providers.alby}
+            disabled={isUpdating || isRemoving}
             onCheckedChange={() => handleToggle("alby")}
           />
         </div>
         <div className='flex items-center justify-between'>
-          <Label htmlFor='laWallet' className='text-base cursor-pointer'>
+          <Label
+            htmlFor='laWallet'
+            className={cn(
+              "text-base cursor-pointer",
+              !providers.laWallet && "text-slate-400"
+            )}
+          >
             LaWallet
           </Label>
           <Switch
             id='laWallet'
             checked={providers.laWallet}
+            disabled={isUpdating || isRemoving}
             onCheckedChange={() => handleToggle("laWallet")}
           />
         </div>
         <div className='flex items-center justify-between'>
-          <Label htmlFor='lndHub' className='text-base cursor-pointer'>
+          <Label
+            htmlFor='lndHub'
+            className={cn(
+              "text-base cursor-pointer",
+              !providers.lndHub && "text-slate-400"
+            )}
+          >
             LndHub
           </Label>
           <Switch
             id='lndHub'
             checked={providers.lndHub}
+            disabled={isUpdating || isRemoving}
             onCheckedChange={() => handleToggle("lndHub")}
           />
         </div>

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock, Bitcoin, QrCode } from "lucide-react";
 import { DomainItem } from "@/types/domain";
+import { useRouter } from "next/navigation";
 
 export interface PayInvoiceProps {
   domain: DomainItem;
@@ -15,6 +15,7 @@ export interface PayInvoiceProps {
 export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
   const [payReq, setPayReq] = useState<string>();
+  const router = useRouter();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -28,6 +29,10 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const handlePayment = () => {
+    router.push(`/admin/waliases/${walias}`);
   };
 
   const requestInvoice = () => {
@@ -84,7 +89,11 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
                 Expires in: {formatTime(timeLeft)}
               </span>
             </div>
-            <Button className='w-full text-lg' size='lg'>
+            <Button
+              className='w-full text-lg'
+              size='lg'
+              onClick={handlePayment}
+            >
               Pay Invoice
             </Button>
           </div>

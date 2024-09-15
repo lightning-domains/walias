@@ -15,6 +15,7 @@ import { DomainItem } from "@/types/domain";
 import ClaimDomain from "./claim-domain";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type HandleStatus = "TAKEN" | "YOURS" | "AVAILABLE" | "CLAIMING" | null;
 
@@ -29,12 +30,13 @@ export default function AddWaliasDialog({
   onOpenChange,
   domain,
 }: AddWaliasDialog) {
-  const [handle, setHandle] = useState("");
+  const [walias, setWalias] = useState("");
   const [status, setStatus] = useState<HandleStatus>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (handle) {
+    if (walias) {
       setIsLoading(true);
       const timer = setTimeout(() => {
         const statuses: HandleStatus[] = ["TAKEN", "YOURS", "AVAILABLE"];
@@ -46,11 +48,11 @@ export default function AddWaliasDialog({
     } else {
       setStatus(null);
     }
-  }, [handle]);
+  }, [walias]);
 
   useEffect(() => {
     if (open) {
-      setHandle("");
+      setWalias("");
       setStatus(null);
     }
   }, [open]);
@@ -63,7 +65,7 @@ export default function AddWaliasDialog({
             <XCircle className='h-4 w-4' />
             <AlertTitle>Unavailable</AlertTitle>
             <AlertDescription>
-              This handle is already taken. Please choose another.
+              This walias is already taken. Please choose another.
             </AlertDescription>
           </Alert>
         );
@@ -73,7 +75,7 @@ export default function AddWaliasDialog({
             <AlertCircle className='h-4 w-4' />
             <AlertTitle>Already Yours</AlertTitle>
             <AlertDescription>
-              <p>You already own this handle.</p>
+              <p>You already own this walias.</p>
               <p>
                 Click on <b>Add Walias</b>.
               </p>
@@ -86,7 +88,7 @@ export default function AddWaliasDialog({
             <CheckCircle2 className='h-4 w-4' />
             <AlertTitle>Available</AlertTitle>
             <AlertDescription>
-              This handle is available. You can claim it now.
+              This walias is available. You can claim it now.
             </AlertDescription>
           </Alert>
         );
@@ -115,6 +117,8 @@ export default function AddWaliasDialog({
       // Add walias using addWalias
       // soon
       // page walias/[single]
+
+      router.push(`/admin/waliases/${walias}`);
     } else if (status === "AVAILABLE") {
       // Claim walias
       setStatus("CLAIMING");
@@ -131,7 +135,7 @@ export default function AddWaliasDialog({
       >
         <ScrollArea className='w-full'>
           {status === "CLAIMING" ? (
-            <ClaimDomain domain={domain} walias={handle} />
+            <ClaimDomain domain={domain} walias={walias} />
           ) : (
             <>
               <DialogHeader>
@@ -143,9 +147,9 @@ export default function AddWaliasDialog({
                 <div className='col-span-4 flex'>
                   <Input
                     className='flex-1 rounded-r-none'
-                    value={handle}
-                    onChange={(e) => setHandle(e.target.value)}
-                    placeholder='Enter your handle'
+                    value={walias}
+                    onChange={(e) => setWalias(e.target.value)}
+                    placeholder='Enter your walias'
                   />
                   <span className='inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm'>
                     {domain.name}
@@ -172,7 +176,7 @@ export default function AddWaliasDialog({
                 <Button
                   type='button'
                   disabled={
-                    !handle ||
+                    !walias ||
                     isLoading ||
                     (status !== "AVAILABLE" && status !== "YOURS")
                   }
