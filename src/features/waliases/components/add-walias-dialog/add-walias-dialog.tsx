@@ -144,7 +144,7 @@ export default function AddWaliasDialog({
                 </DialogTitle>
               </DialogHeader>
               <div className='flex flex-col gap-2'>
-                <div className='col-span-4 flex'>
+                <div className='col-span-4 flex px-1'>
                   <Input
                     className='flex-1 rounded-r-none'
                     value={walias}
