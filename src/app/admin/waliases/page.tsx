@@ -7,7 +7,7 @@ import WaliasesList from "@/features/waliases/components/waliases-list";
 import useDomains from "@/features/domains/hooks/use-domains";
 import NoWalias from "@/features/waliases/components/no-walias";
 import waliases from "@/mocks/waliases";
-import AddWaliasDialog from "@/features/waliases/components/add-walias-dialog";
+import AddWaliasDialog from "@/features/waliases/components/add-walias-dialog/add-walias-dialog";
 
 export default function WaliasPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
