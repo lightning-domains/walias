@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import UpgradeBlock from "./upgrade-block";
 import LoadingMenu from "./loading-menu";
+import PoweredFooter from "./powered-footer";
 
 interface MobileMenuProps {
   menuItems: MenuItem[];
@@ -76,6 +77,7 @@ export default function MobileMenu({
         <div className='mt-auto'>
           <UpgradeBlock isLoading={isLoading} />
         </div>
+        <PoweredFooter />
       </SheetContent>
     </Sheet>
   );

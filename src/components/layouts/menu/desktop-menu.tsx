@@ -8,6 +8,7 @@ import Sidebar from "../sidebar";
 import DomainSwitcher from "../../../features/domains/components/domain-switcher";
 import UpgradeBlock from "./upgrade-block";
 import LoadingMenu from "./loading-menu";
+import PoweredFooter from "./powered-footer";
 
 interface DesktopMenuProps {
   menuItems: MenuItem[];
@@ -73,19 +74,7 @@ export default function DesktopMenu({
       <div className='mt-auto p-4'>
         <UpgradeBlock isLoading={isLoading} />
       </div>
-      <div className='flex flex-col justify-center items-center text-xs p-2 text-gray-400 bg-gray-100 border-t-2 border-t-white'>
-        <p>Powered by </p>
-        <p>
-          <Link
-            className='font-bold hover:text-blue-500'
-            href='https://walias.io'
-            target='_blank'
-          >
-            walias.io
-          </Link>{" "}
-          <i>(v0.1.0)</i>
-        </p>
-      </div>
+      <PoweredFooter />
     </Sidebar>
   );
 }
