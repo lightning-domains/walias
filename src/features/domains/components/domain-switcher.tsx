@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, CheckIcon, PlusCircle } from "lucide-react";
+import { CheckIcon, PlusCircle, ChevronsUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -87,7 +87,7 @@ export default function DomainSwitcher({ className }: DomainSwitcherProps) {
                 <AvatarFallback>LC</AvatarFallback>
               </Avatar>
               {currentDomain.title}
-              <ChevronDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
+              <ChevronsUpDown className='ml-auto h-4 w-4 shrink-0 opacity-50' />
             </Button>
           </PopoverTrigger>
           <PopoverContent className='md:w-[205px] lg:w-[250px] p-0 mt-0'>
