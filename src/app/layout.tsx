@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
 import { AppProvider } from "./provider";
 
-const fontSans = Inter({
+const fontSans = Noto_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
@@ -24,8 +24,8 @@ export default function RootLayout({
     <html lang='en'>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable
+          "min-h-screen bg-background antialiased",
+          fontSans.className
         )}
       >
         <Toaster position='top-right' duration={1000} />
