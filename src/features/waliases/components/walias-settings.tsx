@@ -212,7 +212,7 @@ export default function WaliasSettings({
         )}
       </div>
 
-      <div className='flex space-x-2'>
+      <div className='flex space-x-2 w-full max-w-[400px]'>
         <Button
           variant='outline'
           size='sm'
@@ -226,8 +226,7 @@ export default function WaliasSettings({
             </>
           ) : (
             <>
-              <Trash2 className='mr-2 h-4 w-4' />
-              Remove
+              <Trash2 className='h-4 w-4' />
             </>
           )}
         </Button>

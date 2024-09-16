@@ -76,8 +76,9 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
                 </div>
               </div>
               <span className='text-lg font-medium'>
-                agustin<span className='text-blue-500'>@</span>
-                <span className='text-gray-500'>gorila</span>
+                {walias}
+                <span className='text-blue-500'>@</span>
+                <span className='text-gray-500'>{domain.name}</span>
               </span>
             </div>
             <div className='flex flex-col items-center space-y-1'>
@@ -111,7 +112,9 @@ export default function PayInvoice({ domain, walias }: PayInvoiceProps) {
               </div>
             ) : (
               <div className='flex justify-center items-center'>
-                Click on <b>Generate Invoice</b>, inside the QR.
+                <div>
+                  Click on <b>Generate Invoice</b>, inside the QR.
+                </div>
               </div>
             )}
             <Button
