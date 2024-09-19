@@ -1,4 +1,4 @@
-![walias-cover](./docs/assets/cover.jpg)
+![walias-cover](./docs/assets/cover.png)
 
 # Walias
 
