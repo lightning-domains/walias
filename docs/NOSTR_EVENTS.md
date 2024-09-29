@@ -1,4 +1,4 @@
-# Nostr Events
+# Nostr Events preferences
 
 ## User Domain List
 
@@ -37,20 +37,8 @@ Emitted by the user. (Could be encrypted in the future)
 }
 ```
 
-## Walias publication
+## Lightning Domain Badge
 
-Emitted by the Lightning Domain Admin.
-
-```json
-{
-  "pubkey": "$DOMAIN_ADMIN",
-  "kind": 31201,
-  "tags": [
-    ["d", "walias:$USER_PUBKEY"],
-    ["p", "$USER_PUBKEY"],
-    ["i", "walias_handle"] // username (without domain)
-  ],
-  "content": ""
-  ...
-}
-```
+Keep updated the Badge Definition when a new walias is aisgned or removed from the pubkey.
+Spec in [Lightning Domain](https://github.com/lacrypta/lightning-domains?tab=readme-ov-file#badge-definition).
+Award event should only be published once.
