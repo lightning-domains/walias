@@ -2,10 +2,12 @@
 
 ## User Domain List
 
-Handles and updated list of user domains.
+Handles and updated list of user domains. Used by walias as user settings storage.
+Emitted by the user. (Could be encrypted in the future)
 
 ```json
 {
+  "pubkey": "$USER",
   "kind": 31200,
   "tags": [
     ["d", "domains"],
@@ -31,6 +33,24 @@ Handles and updated list of user domains.
       "waliases": ["ricardo"],
     }
   ]),
+  ...
+}
+```
+
+## Walias publication
+
+Emitted by the Lightning Domain Admin.
+
+```json
+{
+  "pubkey": "$DOMAIN_ADMIN",
+  "kind": 31201,
+  "tags": [
+    ["d", "walias:$USER_PUBKEY"],
+    ["p", "$USER_PUBKEY"],
+    ["i", "walias_handle"] // username (without domain)
+  ],
+  "content": ""
   ...
 }
 ```
