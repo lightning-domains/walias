@@ -38,7 +38,6 @@ const providers: WalletProvider[] = [
     setupComponent: dynamic(
       () => import("../components/providers/lawallet/setup-component"),
       {
-        ssr: false,
         loading: () => <ComponentLoading />,
       }
     ),
