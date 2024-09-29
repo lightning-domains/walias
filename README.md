@@ -16,7 +16,7 @@ Provide Lightning Address and Nostr functionality to your domain without coding.
 
 - [x] Nostr Login
 - [ ] Wizard installer
-- [ ] /.well-known proxy endpoint handler
+- [ ] /.well-known as [Lightning Domain standard](https://github.com/lacrypta/lightning-domains)
 - [ ] [NIP05](https://github.com/nostr-protocol/nips/blob/master/05.md) provider
 - [ ] [LUD16](https://github.com/lnurl/luds/blob/luds/06.md) provider
 - [ ] Multiple domains
