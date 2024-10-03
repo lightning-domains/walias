@@ -1,13 +1,13 @@
 # API Endpoints
 
-The API extends all Lightning Domains standard for each domain with a `/domains/{domain}/` prefix.
+The API extends all [Lightning Domains standard](https://github.com/lightning-domains/lightning-domains/tree/main/api) for each domain with a `/domains/{domain}/` prefix.
 Example: `https://api.walias.io/domains/lacrypta.ar/walias/gorila`
 
 ---
 
 ## Register Domain
 
-**POST** `domains/{domain}`
+`POST domains/{domain}`
 
 #### Description:
 
