@@ -1,0 +1,1075 @@
+openapi: 3.0.0
+info:
+  title: Walias API
+  version: 0.5.0
+paths:
+  /domains/{domain}:
+    post:
+      tags:
+        - Domain
+      summary: Register Domain
+      description: Registers a new domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relays:
+                  type: array
+                  items:
+                    type: string
+                adminPubkey:
+                  type: string
+                rootPubkey:
+                  type: string
+                  nullable: true
+            example:
+              relays: ["wss://relay.domain.com"]
+              adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+              rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+      responses:
+        "201":
+          description: Domain Registered, pending verification
+          content:
+            application/json:
+              example:
+                domain: "lacrypta.ar"
+                relays: ["wss://relay.domain.com"]
+                adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                verifyUrl: "https://lacrypta.ar/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
+                verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                reason: "Invalid domain"
+        "409":
+          description: Already taken or not available
+          content:
+            application/json:
+              example:
+                reason: "Already taken or not available"
+    put:
+      tags:
+        - Domain
+      summary: Update Domain (Authenticated)
+      description: Update data from the domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relays:
+                  type: array
+                  items:
+                    type: string
+                adminPubkey:
+                  type: string
+                rootPubkey:
+                  type: string
+                  nullable: true
+            example:
+              relays: ["wss://relay.domain.com"]
+              adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+              rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                domain: "lacrypta.ar"
+                relays: ["wss://relay.domain.com"]
+                adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+        "400":
+          description: Invalid pubkey
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid pubkey"
+        "401":
+          description: Authentication Required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or Expired Authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication. Must be admin or root"
+      security:
+        - NostrAuth: []
+    delete:
+      tags:
+        - Domain
+      summary: Delete Domain (Authenticated)
+      description: Deletes an existing domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                success: true
+        "404":
+          description: Domain Not Found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Domain not found"
+        "401":
+          description: Authentication Required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or Expired Authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication. Must be admin or root"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/verify:
+    post:
+      tags:
+        - Domain
+      summary: Verify Domain
+      description: Verify domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Domain Verified
+          content:
+            application/json:
+              example:
+                success: true
+                domain: "lacrypta.ar"
+                relays: ["wss://relay.domain.com"]
+                adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                verifyUrl: "https://lacrypta.ar/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
+                verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"
+        "208":
+          description: Already Verified
+          content:
+            application/json:
+              example:
+                success: true
+                domain: "lacrypta.ar"
+                relays: ["wss://relay.domain.com"]
+                adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+                verifyUrl: "https://lacrypta.ar/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
+                verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"
+        "400":
+          description: Invalid Input
+          content:
+            application/json:
+              example:
+                reason: "Invalid domain"
+        "409":
+          description: Validation failed
+          content:
+            application/json:
+              example:
+                reason: "Validation failed"
+  /domains/{domain}/users/{pubkey}:
+    get:
+      tags:
+        - User
+      summary: Get User Data
+      description: Fetches the details (names and relays) associated with a given public key.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pubkey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  names:
+                    type: array
+                    items:
+                      type: string
+                  relays:
+                    type: array
+                    items:
+                      type: string
+              example:
+                names: ["some", "handles"]
+                relays: ["wss://relay.url"]
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "User not found"
+    put:
+      tags:
+        - User
+      summary: Update User Data (Authenticated)
+      description: Update relay list for the user.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pubkey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relays:
+                  type: array
+                  items:
+                    type: string
+            example:
+              relays: ["wss://relay.newurl.com"]
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                names: ["some", "handles"]
+                relays: ["wss://relay.newurl.com"]
+        "400":
+          description: Invalid pubkey
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid pubkey"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "User not found"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/users/{pubkey}/wallets:
+    get:
+      tags:
+        - Wallet
+      summary: Get wallets from a specific user (Authenticated)
+      description: Gets the wallets associated with a specific user.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pubkey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wallet"
+              example:
+                - id: "wallet_id"
+                  config:
+                    tag: "payRequest"
+                    callback: "https://callback.url"
+                    maxSendable: 100000
+                    minSendable: 1000
+                    metadata: "metadata"
+                  priority: 1
+                  provider: "json"
+                  pubkey: "pubkey"
+                  walias: ["some_walias"]
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "User not found"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/walias/{name}:
+    get:
+      tags:
+        - Walias
+      summary: Get walias public data
+      description: Checks if a walias name is available or already registered.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      available:
+                        type: boolean
+                      quote:
+                        type: object
+                        properties:
+                          price:
+                            type: integer
+                          data:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                  - type: object
+                    properties:
+                      available:
+                        type: boolean
+                      pubkey:
+                        type: string
+              examples:
+                available:
+                  value:
+                    available: true
+                    quote:
+                      price: 10000
+                      data:
+                        type: "short"
+                taken:
+                  value:
+                    available: false
+                    pubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+        "404":
+          description: Walias not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Walias not found"
+    post:
+      tags:
+        - Walias
+      summary: Register Walias
+      description: Registers a new walias to the given pubkey.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pubkey:
+                  type: string
+            example:
+              pubkey: "23123123..."
+      responses:
+        "201":
+          description: Walias registered (Free)
+          content:
+            application/json:
+              example:
+                walias: "name@domain"
+                pubkey: "23123123..."
+        "202":
+          description: Walias pending payment
+          content:
+            application/json:
+              example:
+                walias: "name@domain"
+                invoice: "lnbc700u1pn0fewqpp..."
+                referenceId: "9j47dzaqrykna2pjnaepjgnv3wsdp4fey4qtfsx5sx7u"
+                relays: ["wss://relay.domain.com"]
+                verify: "https://url_lnurl21_compatible.com/check"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                reason: "Invalid pubkey"
+        "409":
+          description: Already taken or not available
+          content:
+            application/json:
+              example:
+                reason: "Already taken or not available"
+    put:
+      tags:
+        - Walias
+      summary: Transfer Walias (Authenticated)
+      description: Transfers the walias ownership to a new pubkey.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pubkey:
+                  type: string
+            example:
+              pubkey: "newpubkey..."
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                success: true
+        "400":
+          description: Invalid pubkey
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid pubkey"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: Walias not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Walias not found"
+      security:
+        - NostrAuth: []
+    delete:
+      tags:
+        - Walias
+      summary: Delete Walias (Authenticated)
+      description: Deletes an existing walias.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                success: true
+        "404":
+          description: Walias not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Walias not found"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/walias/{name}/wallets:
+    get:
+      tags:
+        - Wallet
+      summary: Get wallets from a specific walias (Authenticated)
+      description: Gets the wallets associated with a specific walias.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Wallet"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: Walias not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Walias not found"
+      security:
+        - NostrAuth: []
+    post:
+      tags:
+        - Wallet
+      summary: Create wallet for a specific walias (Authenticated)
+      description: Creates a wallet for a specific walias. You can choose the wallet ID.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletCreateRequest"
+      responses:
+        "201":
+          description: Wallet Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/wallets/{walletId}:
+    get:
+      tags:
+        - Wallet
+      summary: Get wallet by ID (Authenticated)
+      description: Retrieves the wallet by its ID.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallet data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: Wallet not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Wallet not found"
+      security:
+        - NostrAuth: []
+    put:
+      tags:
+        - Wallet
+      summary: Update wallet by ID (Authenticated)
+      description: Updates the wallet configuration.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletUpdateRequest"
+      responses:
+        "200":
+          description: Wallet updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid input"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: Wallet not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Wallet not found"
+      security:
+        - NostrAuth: []
+    delete:
+      tags:
+        - Wallet
+      summary: Delete wallet by ID (Authenticated)
+      description: Permanently deletes the wallet configuration.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wallet deleted successfully
+          content:
+            application/json:
+              example:
+                success: true
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Authentication required"
+        "403":
+          description: Invalid or expired authentication
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Invalid authentication"
+        "404":
+          description: Wallet not found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Wallet not found"
+      security:
+        - NostrAuth: []
+  /domains/{domain}/wallets/{walletId}/lnurlp:
+    get:
+      tags:
+        - Wallet
+      summary: Get wallet LNURLP by ID
+      description: Retrieves the LNURL-Pay response (LUD-06) for the wallet ID.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: LNURL-Pay response retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LNURLPayResponse"
+        "404":
+          description: Wallet not found
+          content:
+            application/json:
+              example:
+                status: "ERROR"
+                reason: "Wallet not found"
+  /domains/{domain}/wallets/{walletId}/lnurlp/callback:
+    get:
+      tags:
+        - Wallet
+      summary: Get wallet LNURLP callback by ID
+      description: Retrieves the LNURL-Pay callback response for the wallet ID.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: query
+          required: true
+          schema:
+            type: integer
+            description: Amount in millisatoshis
+      responses:
+        "200":
+          description: LNURL-Pay callback response retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LNURLPayCallbackResponse"
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              example:
+                status: "ERROR"
+                reason: "Invalid request parameters"
+        "404":
+          description: Wallet not found
+          content:
+            application/json:
+              example:
+                status: "ERROR"
+                reason: "Wallet not found"
+components:
+  securitySchemes:
+    NostrAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Nostr
+      description: |
+        Nostr-based authentication as defined in NIP-98.
+
+        Authenticated methods should use an HTTP `Authorization` header in the format:
+
+        ```
+        Authorization: Nostr <encodedEvent>
+        ```
+
+        - **`<encodedEvent>`**: Base64-encoded JSON event.
+
+        Example:
+
+        ```javascript
+        const body = JSON.stringify({
+          name: "name",
+          domain: "domain",
+          pubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd",
+        });
+
+        const event = {
+          kind: 27235,
+          tags: [
+            ["u", "/api/walias"],
+            ["method", "POST"],
+            ["payload", sha256Hex(body)],
+          ],
+          content: "",
+        };
+
+        // Sign event
+
+        const encodedEvent = btoa(JSON.stringify(event));
+
+        const headers = `Authorization: Nostr ${encodedEvent}`;
+        ```
+  schemas:
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: string
+        config:
+          type: object
+          properties:
+            tag:
+              type: string
+            callback:
+              type: string
+            maxSendable:
+              type: integer
+            minSendable:
+              type: integer
+            metadata:
+              type: string
+        priority:
+          type: integer
+        provider:
+          type: string
+        pubkey:
+          type: string
+        walias:
+          type: array
+          items:
+            type: string
+    WalletCreateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Wallet ID (optional)
+        config:
+          type: object
+          properties:
+            tag:
+              type: string
+            callback:
+              type: string
+            maxSendable:
+              type: integer
+            minSendable:
+              type: integer
+            metadata:
+              type: string
+        priority:
+          type: integer
+          description: Lower value means higher priority
+        provider:
+          type: string
+    WalletUpdateRequest:
+      type: object
+      properties:
+        config:
+          type: object
+          properties:
+            tag:
+              type: string
+            callback:
+              type: string
+            maxSendable:
+              type: integer
+            minSendable:
+              type: integer
+            metadata:
+              type: string
+        priority:
+          type: integer
+    LNURLPayResponse:
+      type: object
+      properties:
+        tag:
+          type: string
+        callback:
+          type: string
+        maxSendable:
+          type: integer
+        minSendable:
+          type: integer
+        metadata:
+          type: string
+    LNURLPayCallbackResponse:
+      type: object
+      properties:
+        pr:
+          type: string
+          description: Bech32-serialized lightning invoice
+        routes:
+          type: array
+          items:
+            type: object
+        verify:
+          type: string
