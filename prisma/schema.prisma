@@ -34,6 +34,8 @@ model Domain {
   id             String   @id
   waliases       Walias[]
   rootPrivateKey String
+  verifyKey      String
+  verified       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
