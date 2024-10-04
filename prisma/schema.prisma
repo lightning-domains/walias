@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  pubkey    String   @id @unique
+  waliases  Walias[]
+  wallets   Wallet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Walias {
+  id        Int      @id
+  name      String
+  domainId  String
+  domain    Domain   @relation(fields: [domainId], references: [id])
+  pubkey    String
+  user      User     @relation(fields: [pubkey], references: [pubkey])
+  wallets   Wallet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pubkey])
+}
+
+model Domain {
+  id             String   @id
+  waliases       Walias[]
+  rootPrivateKey String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Wallet {
+  id          Int      @id
+  lastEventId String?
+  config      String
+  provider    String
+  pubkey      String
+  waliasId    Int
+  priority    Int      @default(0) // Default priority is 0
+  user        User     @relation(fields: [pubkey], references: [pubkey])
+  walias      Walias   @relation(fields: [waliasId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([pubkey])
+  @@index([waliasId])
+}
+
+model Payment {
+  id       String @id
+  pubkey   String
+  waliasId Int
+
+  @@index([pubkey])
+  @@index([waliasId])
+}
