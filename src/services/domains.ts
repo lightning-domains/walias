@@ -1,93 +1,117 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
-import { getPublicKey } from "nostr-tools";
-import { isValidDomain } from "@/lib/utils";
 import debug from "debug";
-
-export type DomainData = {
-  id: string;
-  relays: string[];
-  adminPubkey: string;
-  rootPrivkey?: string | null;
-};
+import { isValidDomain } from "@/lib/utils";
 
 const log = debug("app:domains-service");
 
 export class DomainsService {
-  private prisma: PrismaClient;
+  constructor(private prisma: PrismaClient) {}
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  async findDomainById(id: string) {
+    try {
+      log("Looking up domain by id: %s", id);
+      return await this.prisma.domain.findUnique({ where: { id } });
+    } catch (error) {
+      log("Error while looking up domain by id %s: %O", id, error);
+      throw error;
+    }
   }
 
-  async findDomainById(domainId: string) {
-    domainId = domainId.trim().toLowerCase();
-    log("Searching for domain with ID: %s", domainId);
-    return this.prisma.domain.findUnique({
-      where: { id: domainId },
-    });
-  }
+  async createDomain({
+    id,
+    relays,
+    adminPubkey,
+    rootPrivkey,
+  }: {
+    id: string;
+    relays: string[];
+    adminPubkey: string;
+    rootPrivkey: string;
+  }) {
+    try {
+      id = id.trim().toLowerCase();
 
-  async createDomain(data: DomainData) {
-    data.id = data.id.trim().toLowerCase();
+      if (!isValidDomain(id)) {
+        throw new Error("Invalid domain name");
+      }
 
-    if (!isValidDomain(data.id)) {
-      log("Invalid domain name: %s", data.id);
-      throw new Error("Invalid domain name");
-    }
+      log("Creating domain with id: %s", id);
 
-    let { id, relays, adminPubkey, rootPrivkey } = data;
+      const verifyKey = crypto.randomBytes(16).toString("hex");
 
-    if (!rootPrivkey) {
-      rootPrivkey = crypto.randomBytes(32).toString("hex");
-      log("Generated random rootPrivkey for domain: %s", id);
-    }
-
-    const rootPrivkeyUint8Array = new Uint8Array(
-      Buffer.from(rootPrivkey, "hex")
-    );
-    const rootPubkey = getPublicKey(rootPrivkeyUint8Array);
-
-    // Generate verification data
-    const verifyContent = crypto.randomBytes(16).toString("hex");
-    const verifyUrl = `https://${id}/.well-known/${verifyContent}`;
-
-    log("Creating domain with ID: %s", id);
-    const newDomain = await this.prisma.domain.create({
-      data: {
-        id,
-        rootPrivateKey: rootPrivkey,
-        verifyKey: verifyContent,
-        verified: false,
-        waliases: {
-          create: [],
+      const newDomain = await this.prisma.domain.create({
+        data: {
+          id,
+          rootPrivateKey: rootPrivkey,
+          adminPubkey,
+          verifyKey,
+          verified: false,
+          waliases: {
+            create: [],
+          },
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+      });
 
-    log("Successfully created domain: %s", id);
+      log("Successfully created domain: %s", id);
 
-    return {
-      domain: newDomain.id,
+      return {
+        domain: newDomain.id,
+        relays,
+        adminPubkey: newDomain.adminPubkey,
+        rootPubkey: rootPrivkey,
+        verifyUrl: `https://${id}/.well-known/${verifyKey}`,
+        verifyContent: verifyKey,
+      };
+    } catch (error) {
+      log("Error while creating domain %s: %O", id, error);
+      throw error;
+    }
+  }
+
+  async updateDomain(
+    id: string,
+    {
       relays,
       adminPubkey,
-      rootPubkey,
-      verifyUrl,
-      verifyContent,
-    };
-  }
+      rootPrivkey,
+    }: {
+      relays: string[];
+      adminPubkey: string;
+      rootPrivkey?: string;
+    }
+  ) {
+    try {
+      id = id.trim().toLowerCase();
 
-  async updateDomainVerificationStatus(domainId: string, verified: boolean) {
-    log(
-      "Updating verification status for domain with ID: %s to %s",
-      domainId,
-      verified
-    );
-    return this.prisma.domain.update({
-      where: { id: domainId },
-      data: { verified },
-    });
+      if (!isValidDomain(id)) {
+        throw new Error("Invalid domain name");
+      }
+
+      log("Updating domain with id: %s", id);
+
+      const updatedDomain = await this.prisma.domain.update({
+        where: { id },
+        data: {
+          adminPubkey,
+          rootPrivateKey: rootPrivkey || undefined,
+          updatedAt: new Date(),
+        },
+      });
+
+      log("Successfully updated domain: %s", id);
+
+      return {
+        domain: updatedDomain.id,
+        relays,
+        adminPubkey: updatedDomain.adminPubkey,
+        rootPubkey: updatedDomain.rootPrivateKey,
+      };
+    } catch (error) {
+      log("Error while updating domain %s: %O", id, error);
+      throw error;
+    }
   }
 }
