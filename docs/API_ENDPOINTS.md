@@ -21,7 +21,7 @@ Registers a new domain.
 {
   "relays": ["wss://relay.domain.com"],
   "adminPubkey": "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd",
-  "rootPubkey": "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd" // Optional
+  "rootPrivkey": "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd" // Optional
 }
 ```
 
