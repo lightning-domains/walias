@@ -614,6 +614,74 @@ paths:
                 reason: "Invalid authentication"
       security:
         - NostrAuth: []
+  /domains/{domain}/walias/payment/{verificationId}:
+    get:
+      tags:
+        - Walias
+      summary: Verify walias payment
+      description: Checks if payment is already settled.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: verificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  settled:
+                    type: boolean
+                  preimage:
+                    type: string
+                  pr:
+                    type: string
+                example:
+                  status: "OK"
+                  settled: true
+                  preimage: "123456..."
+                  pr: "lnbc10..."
+        "402":
+          description: Payment required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  settled:
+                    type: boolean
+                  preimage:
+                    type: string
+                  pr:
+                    type: string
+                example:
+                  status: "OK"
+                  settled: false
+                  preimage: null
+                  pr: "lnbc10..."
+
+        "404":
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  status: "ERROR"
+                  reason: "Not found"
   /domains/{domain}/walias/{name}/wallets:
     get:
       tags:
