@@ -31,7 +31,7 @@ model Walias {
 }
 
 model Domain {
-  id             String   @id
+  id             String   @id @unique
   waliases       Walias[]
   rootPrivateKey String
   verifyKey      String
