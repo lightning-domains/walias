@@ -16,6 +16,7 @@ model User {
   pubkey    String   @id @unique
   waliases  Walias[]
   wallets   Wallet[]
+  relays    String   @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
