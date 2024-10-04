@@ -64,3 +64,10 @@ export async function getDomainProfile(
     return null;
   }
 }
+
+// Function to validate if a string is a valid domain name
+export function isValidDomain(domain: string): boolean {
+  const domainRegex =
+    /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}(\.[A-Za-z]{2,6})?$/;
+  return domainRegex.test(domain);
+}
