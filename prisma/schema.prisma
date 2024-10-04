@@ -17,7 +17,7 @@ model User {
 }
 
 model Walias {
-  id        Int      @id
+  id        String      @id
   name      String
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
@@ -28,12 +28,14 @@ model Walias {
   updatedAt DateTime @updatedAt
 
   @@index([pubkey])
+  @@unique([name, domainId]) // Add a unique constraint here
 }
 
 model Domain {
   id             String   @id @unique
   waliases       Walias[]
   rootPrivateKey String
+  adminPubkey    String
   verifyKey      String
   verified       Boolean  @default(false)
   createdAt      DateTime @default(now())
@@ -46,7 +48,7 @@ model Wallet {
   config      String
   provider    String
   pubkey      String
-  waliasId    Int
+  waliasId    String
   priority    Int      @default(0) // Default priority is 0
   user        User     @relation(fields: [pubkey], references: [pubkey])
   walias      Walias   @relation(fields: [waliasId], references: [id])
