@@ -6,4 +6,7 @@ export const DomainRegisterSchema = z.object({
   rootPrivkey: z.string().nullable().optional(),
 });
 
+export const DomainUpdateSchema = DomainRegisterSchema;
+
 export type DomainRegisterBody = z.infer<typeof DomainRegisterSchema>;
+export type DomainUpdateBody = DomainRegisterBody;
