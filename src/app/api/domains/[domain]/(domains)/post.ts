@@ -74,16 +74,25 @@ export async function POST(
       rootPrivkey = crypto.randomBytes(32).toString("hex");
     }
 
-    // Create domain using service
-    const newDomain = await domainsService.createDomain({
-      id: domain,
-      relays,
-      adminPubkey,
-      rootPrivkey,
-    });
+    try {
+      // Create domain using service
+      const newDomain = await domainsService.createDomain({
+        id: domain,
+        relays,
+        adminPubkey,
+        rootPrivkey,
+      });
 
-    log("Successfully created domain: %s", domain);
-    return NextResponse.json(newDomain as SuccessResponse, { status: 201 });
+      log("Successfully created domain: %s", domain);
+      return NextResponse.json(newDomain as SuccessResponse, { status: 201 });
+    } catch (error) {
+      return NextResponse.json(
+        { reason: (error as Error).message } as ErrorResponse,
+        {
+          status: 400,
+        }
+      );
+    }
   } catch (error) {
     log("Error while registering domain: %O", error);
     return NextResponse.json(
