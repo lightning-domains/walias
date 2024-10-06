@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import debug from "debug";
 import { isValidDomain, isValidKey } from "@/lib/utils";
