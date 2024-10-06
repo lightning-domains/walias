@@ -71,3 +71,9 @@ export function isValidDomain(domain: string): boolean {
     /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,6}(\.[A-Za-z]{2,6})?$/;
   return domainRegex.test(domain);
 }
+
+// Function to validate if a string is a valid 32 bytes hex string
+export function isValidKey(hexString: string, length: number = 32): boolean {
+  const hexRegex = new RegExp(`^[a-fA-F0-9]{${length * 2}}$`);
+  return hexRegex.test(hexString);
+}
