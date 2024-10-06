@@ -17,7 +17,7 @@ model User {
 }
 
 model Walias {
-  id        String      @id
+  id        String      @id @unique
   name      String
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
@@ -44,7 +44,7 @@ model Domain {
 }
 
 model Wallet {
-  id          Int      @id
+  id          String      @id @unique
   lastEventId String?
   config      String
   provider    String
@@ -61,7 +61,7 @@ model Wallet {
 }
 
 model Payment {
-  id       String @id
+  id       String @id @unique
   pubkey   String
   waliasId Int
 
