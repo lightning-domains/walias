@@ -4,6 +4,33 @@ info:
   version: 0.5.0
 paths:
   /domains/{domain}:
+    get:
+      tags:
+        - Domain
+      summary: Get Domain Information
+      description: Retrieves information about a specific domain.
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/VerifiedDomainResponse"
+                  - $ref: "#/components/schemas/UnverifiedDomainResponse"
+        "404":
+          description: Domain Not Found
+          content:
+            application/json:
+              example:
+                success: false
+                reason: "Domain not found"
     post:
       tags:
         - Domain
@@ -1141,3 +1168,54 @@ components:
             type: object
         verify:
           type: string
+    VerifiedDomainResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+        relays:
+          type: array
+          items:
+            type: string
+        adminPubkey:
+          type: string
+        rootPubkey:
+          type: string
+        verified:
+          type: boolean
+          enum: [true]
+      example:
+        domain: "example.com"
+        relays: ["wss://relay.example.com"]
+        adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
+        rootPubkey: "3cd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fe"
+        verified: true
+
+    UnverifiedDomainResponse:
+      type: object
+      properties:
+        domain:
+          type: string
+        relays:
+          type: array
+          items:
+            type: string
+        adminPubkey:
+          type: string
+        rootPubkey:
+          type: string
+        verified:
+          type: boolean
+          enum: [false]
+        verifyUrl:
+          type: string
+        verifyContent:
+          type: string
+      example:
+        domain: "unverified.com"
+        relays: ["wss://relay.unverified.com"]
+        adminPubkey: "4ed91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fg"
+        rootPubkey: "5fd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fh"
+        verified: false
+        verifyUrl: "https://unverified.com/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
+        verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"

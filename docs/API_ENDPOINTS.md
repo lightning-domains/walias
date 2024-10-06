@@ -251,3 +251,52 @@ const encodedEvent = btoa(JSON.stringify(event));
 
 const headers = `Authorization: Nostr ${encodedEvent}`;
 ```
+
+---
+
+## Get Domain Information
+
+**GET** `domains/{domain}`
+
+#### Description:
+
+Retrieves information about a specific domain.
+
+#### Response:
+
+- **200 OK** (Success)
+
+For a verified domain:
+
+```json
+{
+  "domain": "example.com",
+  "relays": ["wss://relay.example.com"],
+  "adminPubkey": "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd",
+  "rootPubkey": "3cd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fe",
+  "verified": true
+}
+```
+
+For an unverified domain:
+
+```json
+{
+  "domain": "unverified.com",
+  "relays": ["wss://relay.unverified.com"],
+  "adminPubkey": "4ed91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fg",
+  "rootPubkey": "5fd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fh",
+  "verified": false,
+  "verifyUrl": "https://unverified.com/.well-known/ab637c6af276b7bbfa3b7f32726376ab",
+  "verifyContent": "ab637c6af276b7bbfa3b7f32726376ab"
+}
+```
+
+- **404 Not Found** (Domain Not Found)
+
+```json
+{
+  "success": false,
+  "reason": "Domain not found"
+}
+```
