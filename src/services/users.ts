@@ -18,20 +18,24 @@ export class UsersService {
 
   async createUser(pubkey: string) {
     try {
-      log("Creating user with pubkey: %s", pubkey);
+      log("Creating or updating user with pubkey: %s", pubkey);
 
-      const newUser = await this.prisma.user.create({
-        data: {
+      const upsertedUser = await this.prisma.user.upsert({
+        where: { pubkey },
+        update: {
+          updatedAt: new Date(),
+        },
+        create: {
           pubkey,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
 
-      log("Successfully created user: %s", pubkey);
-      return newUser;
+      log("Successfully created or updated user: %s", pubkey);
+      return upsertedUser;
     } catch (error) {
-      log("Error while creating user %s: %O", pubkey, error);
+      log("Error while creating or updating user %s: %O", pubkey, error);
       throw error;
     }
   }

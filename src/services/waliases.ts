@@ -104,4 +104,59 @@ export class WaliasService {
       throw error;
     }
   }
+
+  async findWaliasesByPubkeyAndDomain(
+    pubkey: string,
+    domainId: string
+  ): Promise<Walias[]> {
+    try {
+      log(
+        "Looking up waliases for pubkey: %s and domainId: %s",
+        pubkey,
+        domainId
+      );
+      return await this.prisma.walias.findMany({
+        where: { pubkey, domainId },
+      });
+    } catch (error) {
+      log(
+        "Error while looking up waliases for pubkey %s and domainId %s: %O",
+        pubkey,
+        domainId,
+        error
+      );
+      throw error;
+    }
+  }
+
+  async findWaliasByNameAndDomain(
+    name: string,
+    domainId: string
+  ): Promise<Walias | null> {
+    try {
+      log("Looking up walias by name and domain: %s@%s", name, domainId);
+      return await this.prisma.walias.findUnique({
+        where: { name_domainId: { name, domainId } },
+      });
+    } catch (error) {
+      log(
+        "Error while looking up walias by name and domain %s@%s: %O",
+        name,
+        domainId,
+        error
+      );
+      throw error;
+    }
+  }
+
+  async deleteWalias(id: string): Promise<void> {
+    try {
+      log("Deleting walias with id: %s", id);
+      await this.prisma.walias.delete({ where: { id } });
+      log("Successfully deleted walias with id: %s", id);
+    } catch (error) {
+      log("Error while deleting walias with id %s: %O", id, error);
+      throw error;
+    }
+  }
 }

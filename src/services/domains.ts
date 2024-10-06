@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import debug from "debug";
-import { isValidDomain } from "@/lib/utils";
+import { isValidDomain, isValidKey } from "@/lib/utils";
+import { getPublicKey } from "nostr-tools";
 
 const log = debug("app:domains-service");
 
@@ -11,7 +12,19 @@ export class DomainsService {
   async findDomainById(id: string) {
     try {
       log("Looking up domain by id: %s", id);
-      return await this.prisma.domain.findUnique({ where: { id } });
+      const domain = await this.prisma.domain.findUnique({ where: { id } });
+      // Remove rootPrivateKey
+      if (!domain) {
+        return domain;
+      }
+      return {
+        domain: domain.id,
+        adminPubkey: domain.adminPubkey,
+        verified: domain.verified,
+        verifyKey: domain.verifyKey,
+        relays: JSON.parse(domain.relays),
+        rootPubkey: getPublicKey(Buffer.from(domain.rootPrivateKey, "hex")),
+      };
     } catch (error) {
       log("Error while looking up domain by id %s: %O", id, error);
       throw error;
@@ -20,7 +33,7 @@ export class DomainsService {
 
   async createDomain({
     id,
-    relays,
+    relays = [],
     adminPubkey,
     rootPrivkey,
   }: {
@@ -31,6 +44,14 @@ export class DomainsService {
   }) {
     try {
       id = id.trim().toLowerCase();
+
+      if (!isValidKey(adminPubkey)) {
+        throw new Error("Invalid adminPubkey");
+      }
+
+      if (!isValidKey(rootPrivkey)) {
+        throw new Error("Invalid rootPrivkey");
+      }
 
       if (!isValidDomain(id)) {
         throw new Error("Invalid domain name");
@@ -46,6 +67,7 @@ export class DomainsService {
           rootPrivateKey: rootPrivkey,
           adminPubkey,
           verifyKey,
+          relays: JSON.stringify(relays),
           verified: false,
           waliases: {
             create: [],
@@ -59,7 +81,7 @@ export class DomainsService {
 
       return {
         domain: newDomain.id,
-        relays,
+        relays: JSON.parse(newDomain.relays),
         adminPubkey: newDomain.adminPubkey,
         rootPubkey: rootPrivkey,
         verifyUrl: `https://${id}/.well-known/${verifyKey}`,
@@ -78,8 +100,8 @@ export class DomainsService {
       adminPubkey,
       rootPrivkey,
     }: {
-      relays: string[];
-      adminPubkey: string;
+      relays?: string[];
+      adminPubkey?: string;
       rootPrivkey?: string;
     }
   ) {
@@ -96,7 +118,7 @@ export class DomainsService {
         where: { id },
         data: {
           adminPubkey,
-          rootPrivateKey: rootPrivkey || undefined,
+          rootPrivateKey: rootPrivkey,
           updatedAt: new Date(),
         },
       });
@@ -111,6 +133,21 @@ export class DomainsService {
       };
     } catch (error) {
       log("Error while updating domain %s: %O", id, error);
+      throw error;
+    }
+  }
+
+  async deleteDomain(domain: string) {
+    try {
+      domain = domain.trim().toLowerCase();
+
+      log("Deleting domain: %s", domain);
+
+      await this.prisma.domain.delete({ where: { id: domain } });
+
+      log("Successfully deleted domain: %s", domain);
+    } catch (error) {
+      log("Error while deleting domain: %O", error);
       throw error;
     }
   }
