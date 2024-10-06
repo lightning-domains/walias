@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import debug from "debug";
 
-const log = debug("app:users-service");
+const log = debug("app:service:users");
 
 export class UsersService {
   constructor(private prisma: PrismaClient) {}

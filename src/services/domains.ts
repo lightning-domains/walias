@@ -4,7 +4,7 @@ import debug from "debug";
 import { isValidDomain, isValidKey } from "@/lib/utils";
 import { getPublicKey } from "nostr-tools";
 
-const log = debug("app:domains-service");
+const log = debug("app:service:domains");
 
 export class DomainsService {
   constructor(private prisma: PrismaClient) {}

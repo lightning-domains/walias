@@ -2,7 +2,7 @@ import { PrismaClient, Walias } from "@prisma/client";
 import debug from "debug";
 import crypto from "crypto";
 
-const log = debug("app:walias-service");
+const log = debug("app:service:waliases");
 
 export type WaliasData = { name: string; domainId: string; pubkey: string };
 

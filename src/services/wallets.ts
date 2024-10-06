@@ -2,7 +2,7 @@ import { PrismaClient, Wallet } from "@prisma/client";
 import debug from "debug";
 import crypto from "crypto";
 
-const log = debug("app:wallets-service");
+const log = debug("app:service:wallets");
 
 export type WalletData = {
   id?: string;
