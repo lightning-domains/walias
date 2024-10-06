@@ -11,8 +11,6 @@ beforeAll(async () => {
   const testDbUrl = `file:${path.join(__dirname, "../../prisma/test.db")}`;
   process.env.DATABASE_URL = testDbUrl;
 
-  console.log("Setting DATABASE_URL to:", testDbUrl);
-
   execSync("pnpm prisma migrate deploy", {
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: testDbUrl },
@@ -20,7 +18,6 @@ beforeAll(async () => {
 
   // Log PrismaClient configuration if needed for debugging
   prisma = new PrismaClient();
-  console.log("PrismaClient config:", prisma);
 });
 
 afterAll(async () => {
