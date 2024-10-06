@@ -5,5 +5,6 @@ module.exports = {
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[tj]s?(x)"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "@prisma/client": "<rootDir>/__mocks__/@prisma/client",
   },
 };
