@@ -15,7 +15,11 @@ export type WalletData = {
 };
 
 export class WalletsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
   async createWallet(data: WalletData): Promise<Wallet> {
     try {

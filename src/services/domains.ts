@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import debug from "debug";
 import { isValidDomain, isValidKey } from "@/lib/utils";
@@ -7,7 +7,11 @@ import { getPublicKey } from "nostr-tools";
 const log = debug("app:service:domains");
 
 export class DomainsService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
   async findDomainById(id: string) {
     try {
@@ -61,21 +65,39 @@ export class DomainsService {
 
       const verifyKey = crypto.randomBytes(16).toString("hex");
 
-      const newDomain = await this.prisma.domain.create({
-        data: {
-          id,
-          rootPrivateKey: rootPrivkey,
-          adminPubkey,
-          verifyKey,
-          relays: JSON.stringify(relays),
-          verified: false,
-          waliases: {
-            create: [],
-          },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
+      const createData = {
+        id,
+        rootPrivateKey: rootPrivkey,
+        adminPubkey,
+        verifyKey,
+        relays: JSON.stringify(relays),
+        verified: false,
+        // waliases: {
+        //   create: [
+        //     {
+        //       name: "_",
+        //       pubkey: getPublicKey(Buffer.from(rootPrivkey, "hex")),
+        //       domainId: id,
+        //     },
+        //     {
+        //       name: "admin",
+        //       pubkey: adminPubkey,
+        //       domainId: id,
+        //     },
+        //   ],
+        // },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      log("Attempting to create domain with data: %O", id);
+      const newDomain = await this.prisma.domain.create({ data: createData });
+
+      if (!newDomain) {
+        log("Failed to create domain: %O", createData);
+
+        throw new Error("Failed to create domain");
+      }
 
       log("Successfully created domain: %s", id);
 

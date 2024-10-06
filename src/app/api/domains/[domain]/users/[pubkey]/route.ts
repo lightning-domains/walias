@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { UsersService } from "@/services/users";
 import { WaliasService } from "@/services/waliases";
-import { prisma } from "@/lib/prisma";
 import { UserUpdateSchema } from "@/types/requests/users";
 import debug from "debug";
 
-const usersService = new UsersService(prisma);
-const waliasService = new WaliasService(prisma);
 const log = debug("app:user-endpoints");
 
 export async function GET(
@@ -14,6 +11,9 @@ export async function GET(
   { params }: { params: { domain: string; pubkey: string } }
 ) {
   try {
+    const usersService = new UsersService();
+    const waliasService = new WaliasService();
+
     const { domain, pubkey } = params;
 
     log("Fetching user data for pubkey: %s in domain: %s", pubkey, domain);
@@ -46,6 +46,9 @@ export async function PUT(
   { params }: { params: { domain: string; pubkey: string } }
 ) {
   try {
+    const usersService = new UsersService();
+    const waliasService = new WaliasService();
+
     const { domain, pubkey } = params;
     const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
 

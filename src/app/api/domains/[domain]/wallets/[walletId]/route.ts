@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WalletsService } from "@/services/wallets";
-import { prisma } from "@/lib/prisma";
 import { WalletUpdateSchema } from "@/types/requests/wallets";
 import debug from "debug";
 
-const walletsService = new WalletsService(prisma);
 const log = debug("app:wallet-endpoints");
 
 export async function GET(
@@ -12,6 +10,7 @@ export async function GET(
   { params }: { params: { domain: string; walletId: string } }
 ) {
   try {
+    const walletsService = new WalletsService();
     const { domain, walletId } = params;
     const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
 
@@ -52,6 +51,7 @@ export async function PUT(
   { params }: { params: { domain: string; walletId: string } }
 ) {
   try {
+    const walletsService = new WalletsService();
     const { domain, walletId } = params;
     const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
 
@@ -109,6 +109,7 @@ export async function DELETE(
   { params }: { params: { domain: string; walletId: string } }
 ) {
   try {
+    const walletsService = new WalletsService();
     const { domain, walletId } = params;
     const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
 

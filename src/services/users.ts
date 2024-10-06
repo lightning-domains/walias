@@ -4,7 +4,24 @@ import debug from "debug";
 const log = debug("app:service:users");
 
 export class UsersService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async findUserById(pubkey: string) {
+    try {
+      log("Looking up user by pubkey: %s", pubkey);
+      const user = await this.prisma.user.findUnique({
+        where: { pubkey: pubkey },
+      });
+      return user;
+    } catch (error) {
+      log("Error while looking up user by id %s: %O", pubkey, error);
+      throw error;
+    }
+  }
 
   async findUserByPubkey(pubkey: string) {
     try {

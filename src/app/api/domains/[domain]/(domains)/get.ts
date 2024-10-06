@@ -1,16 +1,14 @@
-import { prisma } from "@/lib/prisma";
 import { DomainsService } from "@/services/domains";
 import { NextRequest, NextResponse } from "next/server";
-const domainsService = new DomainsService(prisma);
 
 // GET: Get Domain
 export async function GET(
   _request: NextRequest,
   { params }: { params: { domain: string } }
 ) {
-  const { domain } = params;
-
   try {
+    const { domain } = params;
+    const domainsService = new DomainsService();
     const domainInfo = await domainsService.findDomainById(domain);
 
     if (!domainInfo) {

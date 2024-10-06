@@ -7,7 +7,10 @@ const log = debug("app:service:waliases");
 export type WaliasData = { name: string; domainId: string; pubkey: string };
 
 export class WaliasService {
-  constructor(private prisma: PrismaClient) {}
+  private prisma: PrismaClient;
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
 
   async findWaliasById(id: string): Promise<Walias | null> {
     try {

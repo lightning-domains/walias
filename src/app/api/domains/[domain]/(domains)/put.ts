@@ -1,7 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import { DomainsService } from "@/services/domains";
 import { NextRequest, NextResponse } from "next/server";
-const domainsService = new DomainsService(prisma);
 
 import debug from "debug";
 import { ErrorResponse } from "@/types/requests/shared";
@@ -24,6 +22,7 @@ export async function PUT(
   { params }: { params: { domain: string } }
 ) {
   try {
+    const domainsService = new DomainsService();
     let { domain } = params;
     domain = domain.trim().toLowerCase();
 

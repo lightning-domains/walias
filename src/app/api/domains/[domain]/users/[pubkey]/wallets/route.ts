@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WalletsService } from "@/services/wallets";
-import { prisma } from "@/lib/prisma";
 import debug from "debug";
-
-const walletsService = new WalletsService(prisma);
 const log = debug("app:user-wallets-endpoints");
 
 export async function GET(
@@ -11,6 +8,7 @@ export async function GET(
   { params }: { params: { domain: string; pubkey: string } }
 ) {
   try {
+    const walletsService = new WalletsService();
     const { domain, pubkey } = params;
     const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
 

@@ -1,7 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import { DomainsService } from "@/services/domains";
 import { NextRequest, NextResponse } from "next/server";
-const domainsService = new DomainsService(prisma);
 import crypto from "crypto";
 
 import debug from "debug";
@@ -25,6 +23,8 @@ export async function POST(
   { params }: { params: { domain: string } }
 ) {
   try {
+    const domainsService = new DomainsService();
+
     let { domain } = params;
     domain = domain.trim().toLowerCase();
 
