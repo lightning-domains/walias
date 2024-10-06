@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DomainsService } from "@/services/domains";
 import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 import {
   DomainRegisterSchema,
   DomainUpdateSchema,
 } from "@/types/requests/domains";
 import { getPublicKey } from "nostr-tools";
 import debug from "debug";
-import crypto from "crypto";
 
 const domainsService = new DomainsService(prisma);
 const log = debug("app:domain-endpoints");
@@ -47,9 +47,7 @@ export async function POST(
       log("Invalid input for domain %s: %s", domain, errorMessages);
       return NextResponse.json(
         { reason: `Invalid input: ${errorMessages}` } as ErrorResponse,
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
@@ -62,10 +60,10 @@ export async function POST(
         const verifyUrl = `https://${domain}/.well-known/${existingDomain.verifyKey}`;
         return NextResponse.json(
           {
-            domain: existingDomain.id,
+            domain: existingDomain.domain,
             relays,
             adminPubkey,
-            rootPubkey: existingDomain.rootPrivateKey,
+            rootPubkey: existingDomain.rootPubkey,
             verifyUrl,
             verifyContent: existingDomain.verifyKey,
           } as SuccessResponse,
@@ -114,9 +112,7 @@ export async function PUT(
     if (!pubkey) {
       return NextResponse.json(
         { reason: "Authentication required" } as ErrorResponse,
-        {
-          status: 401,
-        }
+        { status: 401 }
       );
     }
 
@@ -133,9 +129,7 @@ export async function PUT(
       log("Invalid input for domain %s: %s", domain, errorMessages);
       return NextResponse.json(
         { reason: `Invalid input: ${errorMessages}` } as ErrorResponse,
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
 
@@ -150,13 +144,11 @@ export async function PUT(
       );
     }
 
-    // Derive public key from existing rootPrivateKey
-    const rootPubkey = getPublicKey(
-      new Uint8Array(Buffer.from(existingDomain.rootPrivateKey, "hex"))
-    );
-
     // Check if the pubkey is authorized (must be admin or root)
-    if (existingDomain.adminPubkey !== pubkey && rootPubkey !== pubkey) {
+    if (
+      existingDomain.adminPubkey !== pubkey &&
+      existingDomain.rootPubkey !== pubkey
+    ) {
       return NextResponse.json(
         {
           reason: "Invalid authentication. Must be admin or root",
@@ -165,12 +157,6 @@ export async function PUT(
       );
     }
 
-    if (!rootPrivkey) {
-      rootPrivkey = crypto.randomBytes(32).toString("hex");
-    }
-
-    // Update domain using service
-    log("Updating domain: %s", domain);
     const updatedDomain = await domainsService.updateDomain(domain, {
       relays,
       adminPubkey,
@@ -181,6 +167,58 @@ export async function PUT(
     return NextResponse.json(updatedDomain as SuccessResponse, { status: 200 });
   } catch (error) {
     log("Error while updating domain: %O", error);
+    return NextResponse.json(
+      { reason: "Internal server error" } as ErrorResponse,
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: Delete Domain
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { domain: string } }
+) {
+  try {
+    let { domain } = params;
+    domain = domain.trim().toLowerCase();
+
+    const pubkey = req.headers.get("x-authenticated-pubkey");
+    if (!pubkey) {
+      return NextResponse.json(
+        { reason: "Authentication required" } as ErrorResponse,
+        { status: 401 }
+      );
+    }
+
+    log("Received request to delete domain: %s by pubkey: %s", domain, pubkey);
+
+    const existingDomain = await domainsService.findDomainById(domain);
+    if (!existingDomain) {
+      return NextResponse.json(
+        { reason: "Domain not found" } as ErrorResponse,
+        { status: 404 }
+      );
+    }
+
+    if (
+      existingDomain.adminPubkey !== pubkey &&
+      existingDomain.rootPubkey !== pubkey
+    ) {
+      return NextResponse.json(
+        {
+          reason: "Invalid authentication. Must be admin or root",
+        } as ErrorResponse,
+        { status: 403 }
+      );
+    }
+
+    await domainsService.deleteDomain(domain);
+
+    log("Successfully deleted domain: %s", domain);
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    log("Error while deleting domain: %O", error);
     return NextResponse.json(
       { reason: "Internal server error" } as ErrorResponse,
       { status: 500 }
