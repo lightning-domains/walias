@@ -19,8 +19,9 @@ export class DomainsService {
       const domain = await this.prisma.domain.findUnique({ where: { id } });
       // Remove rootPrivateKey
       if (!domain) {
-        return domain;
+        return null;
       }
+
       return {
         domain: domain.id,
         adminPubkey: domain.adminPubkey,
