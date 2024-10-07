@@ -122,10 +122,12 @@ export class DomainsService {
       relays,
       adminPubkey,
       rootPrivkey,
+      verified,
     }: {
       relays?: string[];
       adminPubkey?: string;
       rootPrivkey?: string;
+      verified?: boolean;
     }
   ) {
     try {
@@ -142,6 +144,8 @@ export class DomainsService {
         data: {
           adminPubkey,
           rootPrivateKey: rootPrivkey,
+          verified,
+          relays: relays ? JSON.stringify(relays) : undefined,
           updatedAt: new Date(),
         },
       });
@@ -150,9 +154,10 @@ export class DomainsService {
 
       return {
         domain: updatedDomain.id,
-        relays,
+        relays: JSON.parse(updatedDomain.relays),
         adminPubkey: updatedDomain.adminPubkey,
         rootPubkey: updatedDomain.rootPrivateKey,
+        verified: updatedDomain.verified,
       };
     } catch (error) {
       log("Error while updating domain %s: %O", id, error);
@@ -172,6 +177,54 @@ export class DomainsService {
     } catch (error) {
       log("Error while deleting domain: %O", error);
       throw error;
+    }
+  }
+
+  async verifyDomain(
+    domain: string
+  ): Promise<{ verified: boolean; alreadyVerified: boolean }> {
+    try {
+      log("Verifying domain: %s", domain);
+      // First, get the domain information
+      const domainInfo = await this.findDomainById(domain);
+
+      if (!domainInfo) {
+        throw new Error("Domain not found");
+      }
+
+      // Check if the domain is already verified
+      if (domainInfo.verified) {
+        log("Domain %s is already verified", domain);
+        return { verified: true, alreadyVerified: true };
+      }
+
+      // Construct the verifyUrl
+      const verifyUrl = `https://${domain}/.well-known/${domainInfo.verifyKey}`;
+
+      // Fetch the content from the verifyUrl
+      log("Fetching content from %s", verifyUrl);
+      const response = await fetch(verifyUrl);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const fetchedContent = (await response.text()).trim();
+
+      // Compare the fetched content with the expected verifyContent
+      if (fetchedContent === domainInfo.verifyKey) {
+        // If the content matches, update the domain as verified
+        log("Verification content matched for domain %s", domain);
+        await this.updateDomain(domain, { verified: true });
+        return { verified: true, alreadyVerified: false };
+      } else {
+        // If the content doesn't match, verification failed
+        log("Verification failed for domain %s", domain);
+        return { verified: false, alreadyVerified: false };
+      }
+    } catch (error) {
+      log("Error verifying domain %s: %O", domain, error);
+      throw new Error("Failed to verify domain");
     }
   }
 }
