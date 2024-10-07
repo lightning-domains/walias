@@ -110,7 +110,7 @@ export class DomainsService {
         verifyContent: verifyKey,
       };
     } catch (error) {
-      log("Error while creating domain %s: %O", id, error);
+      log("Error while creating domain %s: %O", id, (error as Error).message);
       throw error;
     }
   }
