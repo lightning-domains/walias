@@ -61,9 +61,6 @@ CREATE UNIQUE INDEX "Walias_id_key" ON "Walias"("id");
 CREATE INDEX "Walias_pubkey_idx" ON "Walias"("pubkey");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Walias_name_domainId_key" ON "Walias"("name", "domainId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Domain_id_key" ON "Domain"("id");
 
 -- CreateIndex

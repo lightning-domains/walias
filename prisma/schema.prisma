@@ -22,12 +22,11 @@ model Walias {
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
   pubkey    String
-  user      User?    @relation(fields: [pubkey], references: [pubkey])
+  user      User     @relation(fields: [pubkey], references: [pubkey])
   wallets   Wallet[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([name, domainId]) // Add a unique constraint here
   @@index([pubkey])
 }
 
