@@ -17,18 +17,18 @@ model User {
 }
 
 model Walias {
-  id        String      @id @unique
+  id        String   @id @unique
   name      String
   domainId  String
   domain    Domain   @relation(fields: [domainId], references: [id])
   pubkey    String
-  user      User     @relation(fields: [pubkey], references: [pubkey])
+  user      User?    @relation(fields: [pubkey], references: [pubkey])
   wallets   Wallet[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([pubkey])
   @@unique([name, domainId]) // Add a unique constraint here
+  @@index([pubkey])
 }
 
 model Domain {
@@ -43,14 +43,14 @@ model Domain {
 }
 
 model Wallet {
-  id          String      @id @unique
+  id          String   @id @unique
   lastEventId String?
   config      String
   provider    String
   pubkey      String
   waliasId    String
   priority    Int      @default(0) // Default priority is 0
-  user        User     @relation(fields: [pubkey], references: [pubkey])
+  user        User?    @relation(fields: [pubkey], references: [pubkey])
   walias      Walias   @relation(fields: [waliasId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
