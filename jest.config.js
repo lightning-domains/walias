@@ -1,3 +1,13 @@
+const dotenv = require("dotenv");
+const path = require("path");
+
+const envPath = path.resolve(__dirname, ".env.test");
+console.log("Loading environment variables from:", envPath);
+dotenv.config({ path: envPath });
+
+process.env.NODE_ENV = "test";
+process.env.__NEXT_TEST_MODE = "true";
+
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
@@ -6,4 +16,5 @@ module.exports = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  setupFiles: ["<rootDir>/jest.setup.js"],
 };
