@@ -22,8 +22,7 @@ CREATE TABLE "Walias" (
 CREATE TABLE "Domain" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "rootPrivateKey" TEXT NOT NULL,
-    "adminPubkey" TEXT NOT NULL,
-    "verifyKey" TEXT NOT NULL,
+    "adminPubkey" TEXT,
     "verified" BOOLEAN NOT NULL DEFAULT false,
     "relays" TEXT NOT NULL DEFAULT '[]',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
