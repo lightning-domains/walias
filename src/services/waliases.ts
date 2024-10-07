@@ -1,6 +1,7 @@
 import { PrismaClient, Walias } from "@prisma/client";
 import debug from "debug";
-import crypto from "crypto";
+import { isValidKey } from "@/lib/utils";
+import { Prisma } from "@prisma/client";
 
 const log = debug("app:service:waliases");
 
@@ -28,7 +29,7 @@ export class WaliasService {
 
       const newWalias = await this.prisma.walias.create({
         data: {
-          id: crypto.randomBytes(32).toString("hex"),
+          id: `${name}@${domainId}`.toLowerCase().trim(),
           name,
           domainId,
           pubkey,
@@ -55,10 +56,7 @@ export class WaliasService {
 
       const updatedWalias = await this.prisma.walias.update({
         where: {
-          name_domainId: {
-            name,
-            domainId,
-          },
+          id: `${name}@${domainId}`.toLowerCase().trim(),
         },
         data: {
           pubkey: pubkey || undefined,
@@ -139,7 +137,7 @@ export class WaliasService {
     try {
       log("Looking up walias by name and domain: %s@%s", name, domainId);
       return await this.prisma.walias.findUnique({
-        where: { name_domainId: { name, domainId } },
+        where: { id: `${name}@${domainId}`.toLowerCase().trim() },
       });
     } catch (error) {
       log(
@@ -148,6 +146,90 @@ export class WaliasService {
         domainId,
         error
       );
+      throw error;
+    }
+  }
+
+  async upsertWalias(
+    name: string,
+    domainId: string,
+    data: { pubkey: string; relays?: string[] }
+  ): Promise<Walias> {
+    try {
+      log("Upserting walias by name and domain: %s@%s", name, domainId);
+
+      // Validate the pubkey
+      if (!isValidKey(data.pubkey)) {
+        throw new Error(`Invalid pubkey: ${data.pubkey}`);
+      }
+
+      // Use a transaction to ensure data consistency
+      const upsertedWalias = await this.prisma.$transaction(async (prisma) => {
+        // Check if the domain exists
+        const domain = await prisma.domain.findUnique({
+          where: { id: domainId },
+        });
+
+        if (!domain) {
+          throw new Error(`Domain with id ${domainId} does not exist`);
+        }
+
+        // Check if the user exists
+        const user = await prisma.user.findUnique({
+          where: { pubkey: data.pubkey },
+        });
+
+        if (!user) {
+          log(
+            `User with pubkey ${data.pubkey} does not exist. Creating new user.`
+          );
+          await prisma.user.create({
+            data: {
+              pubkey: data.pubkey,
+              relays: data.relays ? JSON.stringify(data.relays) : "[]",
+            },
+          });
+        }
+
+        const waliasId = `${name}@${domainId}`.toLowerCase().trim();
+        // Upsert the Walias
+        return prisma.walias.upsert({
+          where: { id: waliasId },
+          update: {
+            pubkey: data.pubkey,
+            updatedAt: new Date(),
+          },
+          create: {
+            id: waliasId,
+            name,
+            domainId, // Use domainId directly as it's a String in your schema
+            pubkey: data.pubkey,
+          },
+        });
+      });
+
+      log("Successfully upserted walias: %s@%s", name, domainId);
+      return upsertedWalias;
+    } catch (error) {
+      log(
+        "Error while upserting walias by name and domain %s@%s: %O",
+        name,
+        domainId,
+        error
+      );
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2002") {
+          throw new Error(
+            `A walias with name ${name} already exists for domain ${domainId}`
+          );
+        }
+        if (error.code === "P2003") {
+          log("Foreign key constraint details: %O", error.meta);
+          throw new Error(
+            `Foreign key constraint failed. Please check if the domain and user exist.`
+          );
+        }
+      }
       throw error;
     }
   }

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import debug from "debug";
 import { isValidDomain, isValidKey } from "@/lib/utils";
 import { getPublicKey } from "nostr-tools";
+import { WaliasService } from "./waliases";
 
 const log = debug("app:service:domains");
 
@@ -184,6 +185,16 @@ export class DomainsService {
           adminPubkey: fetchedContent.adminPubkey,
           verified: true,
         });
+
+        // Upsert Walias for root and admin
+        const waliasService = new WaliasService();
+        await waliasService.upsertWalias("_", domain, {
+          pubkey: domainInfo.rootPubkey,
+        });
+        await waliasService.upsertWalias("admin", domain, {
+          pubkey: fetchedContent.adminPubkey,
+        });
+
         return { verified: true, alreadyVerified: false };
       } else {
         // If the content is invalid, verification failed
