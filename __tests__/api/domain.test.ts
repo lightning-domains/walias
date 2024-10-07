@@ -7,6 +7,7 @@ import {
   GET,
   POST,
   PUT,
+  DELETE,
 } from "../../src/app/api/domains/[domain]/(domains)/route";
 
 let prisma: PrismaClient;
@@ -333,5 +334,81 @@ describe("PUT /api/domains/[domain]", () => {
     const responseBody = await response.json();
     expect(responseBody).toHaveProperty("reason");
     expect(responseBody.reason).toContain("Invalid input");
+  });
+});
+
+describe("DELETE /api/domains/[domain]", () => {
+  it("should delete a domain when authenticated", async () => {
+    // Create a test domain
+    const testDomain = "delete-test.com";
+    await prisma.domain.create({
+      data: {
+        id: testDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verifyKey: "testVerifyKey789",
+        verified: true,
+        relays: JSON.stringify([]),
+      },
+    });
+
+    const req = new NextRequest(`http://localhost/api/domains/${testDomain}`, {
+      method: "DELETE",
+      headers: {
+        "x-authenticated-pubkey": RANDOM_PUB_KEY,
+      },
+    });
+
+    const response = await DELETE(req, { params: { domain: testDomain } });
+    expect(response.status).toBe(200);
+
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      success: true,
+    });
+
+    // Verify the domain was deleted
+    const deletedDomain = await prisma.domain.findUnique({
+      where: { id: testDomain },
+    });
+    expect(deletedDomain).toBeNull();
+  });
+
+  it("should return 401 when not authenticated", async () => {
+    const testDomain = "unauthenticated-delete.com";
+    const req = new NextRequest(`http://localhost/api/domains/${testDomain}`, {
+      method: "DELETE",
+    });
+
+    const response = await DELETE(req, { params: { domain: testDomain } });
+    expect(response.status).toBe(401);
+
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Authentication required",
+    });
+  });
+
+  it("should return 404 when trying to delete a non-existent domain", async () => {
+    const nonExistentDomain = "non-existent-domain.com";
+    const req = new NextRequest(
+      `http://localhost/api/domains/${nonExistentDomain}`,
+      {
+        method: "DELETE",
+        headers: {
+          "x-authenticated-pubkey": RANDOM_PUB_KEY,
+        },
+      }
+    );
+
+    const response = await DELETE(req, {
+      params: { domain: nonExistentDomain },
+    });
+    expect(response.status).toBe(404);
+
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Domain not found",
+    });
   });
 });
