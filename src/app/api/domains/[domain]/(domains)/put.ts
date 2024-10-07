@@ -37,10 +37,10 @@ export async function PUT(
     log("Received request to update domain: %s by pubkey: %s", domain, pubkey);
 
     const body = await req.json();
-
     // Validate request body with DomainUpdateSchema
     const parseResult = DomainUpdateSchema.safeParse(body);
     if (!parseResult.success) {
+      log("Validation failed for: %O", parseResult.error);
       const errorMessages = parseResult.error.errors
         .map((e) => e.message)
         .join(", ");
