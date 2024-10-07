@@ -13,7 +13,6 @@ export async function GET(
   { params }: { params: { domain: string } }
 ) {
   const domainsService = new DomainsService();
-  const waliasService = new WaliasService();
 
   try {
     const { domain } = params;
