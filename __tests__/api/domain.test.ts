@@ -1,9 +1,13 @@
 import { NextRequest } from "next/server";
-import { POST } from "../../src/app/api/domains/[domain]/(domains)/post";
-import { GET } from "../../src/app/api/domains/[domain]/(domains)/get";
 import { execSync } from "child_process";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
+
+import {
+  GET,
+  POST,
+  PUT,
+} from "../../src/app/api/domains/[domain]/(domains)/route";
 
 let prisma: PrismaClient;
 
@@ -186,5 +190,148 @@ describe("GET /api/domains/[domain]", () => {
     expect(data).toEqual({
       reason: "Invalid domain name",
     });
+  });
+});
+
+describe("PUT /api/domains/[domain]", () => {
+  const mockDomain = "example.com";
+  const validPayload = {
+    relays: ["wss://relay1.example.com", "wss://relay2.example.com"],
+    adminPubkey: RANDOM_PUB_KEY,
+    rootPrivkey: RANDOM_PRIV_KEY,
+  };
+
+  beforeEach(async () => {
+    // Clear the database and create a test domain before each test
+    await prisma.domain.deleteMany();
+    await prisma.domain.create({
+      data: {
+        id: mockDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verifyKey: "testVerifyKey789",
+        verified: true,
+        relays: JSON.stringify(validPayload.relays),
+      },
+    });
+  });
+
+  it("should update a domain when authenticated with admin pubkey", async () => {
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${mockDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-authenticated-pubkey": RANDOM_PUB_KEY,
+        },
+        body: JSON.stringify(validPayload),
+      }),
+      { params: { domain: mockDomain } }
+    );
+
+    expect(response.status).toBe(200);
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      domain: mockDomain,
+      relays: validPayload.relays,
+      adminPubkey: validPayload.adminPubkey,
+      rootPubkey: expect.any(String), // The public key derived from rootPrivkey
+    });
+
+    // Verify the domain was actually updated in the database
+    const updatedDomain = await prisma.domain.findUnique({
+      where: { id: mockDomain },
+    });
+    expect(updatedDomain).not.toBeNull();
+    expect(updatedDomain?.adminPubkey).toBe(validPayload.adminPubkey);
+    expect(updatedDomain?.rootPrivateKey).toBe(validPayload.rootPrivkey);
+    expect(JSON.parse(updatedDomain?.relays || "[]")).toEqual(
+      validPayload.relays
+    );
+  });
+
+  it("should return 401 when not authenticated", async () => {
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${mockDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(validPayload),
+      }),
+      { params: { domain: mockDomain } }
+    );
+
+    expect(response.status).toBe(401);
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Authentication required",
+    });
+  });
+
+  it("should return 403 for unauthorized pubkey", async () => {
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${mockDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-authenticated-pubkey": "unauthorizedPubkey123",
+        },
+        body: JSON.stringify(validPayload),
+      }),
+      { params: { domain: mockDomain } }
+    );
+
+    expect(response.status).toBe(403);
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Invalid authentication. Must be admin or root",
+    });
+  });
+
+  it("should return 404 when domain is not found", async () => {
+    const nonExistentDomain = "nonexistent.com";
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${nonExistentDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-authenticated-pubkey": RANDOM_PUB_KEY,
+        },
+        body: JSON.stringify(validPayload),
+      }),
+      { params: { domain: nonExistentDomain } }
+    );
+
+    expect(response.status).toBe(404);
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Domain not found",
+    });
+  });
+
+  it("should return 400 for invalid payload", async () => {
+    const invalidPayload = {
+      relays: "not-an-array",
+      adminPubkey: "",
+      rootPrivkey: 123,
+    };
+
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${mockDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-authenticated-pubkey": RANDOM_PUB_KEY,
+        },
+        body: JSON.stringify(invalidPayload),
+      }),
+      { params: { domain: mockDomain } }
+    );
+
+    expect(response.status).toBe(400);
+    const responseBody = await response.json();
+    expect(responseBody).toHaveProperty("reason");
+    expect(responseBody.reason).toContain("Invalid input");
   });
 });
