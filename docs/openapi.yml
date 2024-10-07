@@ -53,15 +53,8 @@ paths:
                   type: array
                   items:
                     type: string
-                adminPubkey:
-                  type: string
-                rootPrivkey:
-                  type: string
-                  nullable: true
             example:
               relays: ["wss://relay.domain.com"]
-              adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
-              rootPrivkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
       responses:
         "201":
           description: Domain Registered, pending verification
@@ -70,10 +63,7 @@ paths:
               example:
                 domain: "lacrypta.ar"
                 relays: ["wss://relay.domain.com"]
-                adminPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
-                rootPubkey: "2ad91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fd"
-                verifyUrl: "https://lacrypta.ar/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
-                verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"
+                verifyUrl: "https://lacrypta.ar/.well-known/walias.json"
         "400":
           description: Invalid Input
           content:
@@ -1205,13 +1195,10 @@ components:
           enum: [false]
         verifyUrl:
           type: string
-        verifyContent:
-          type: string
       example:
         domain: "unverified.com"
         relays: ["wss://relay.unverified.com"]
         adminPubkey: "4ed91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fg"
         rootPubkey: "5fd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fh"
         verified: false
-        verifyUrl: "https://unverified.com/.well-known/ab637c6af276b7bbfa3b7f32726376ab"
-        verifyContent: "ab637c6af276b7bbfa3b7f32726376ab"
+        verifyUrl: "https://unverified.com/.well-known/walias.json"

@@ -46,7 +46,6 @@ describe("POST /api/domains/[domain]", () => {
         method: "POST",
         body: JSON.stringify({
           relays: ["wss://relay1.example.com", "wss://relay2.example.com"],
-          adminPubkey: RANDOM_PRIV_KEY,
         }),
       }
     );
@@ -63,7 +62,6 @@ describe("POST /api/domains/[domain]", () => {
     });
 
     expect(createdDomain).not.toBeNull();
-    expect(createdDomain?.adminPubkey).toBe(RANDOM_PRIV_KEY);
   });
 
   it("should return 409 if domain already exists", async () => {
@@ -73,7 +71,6 @@ describe("POST /api/domains/[domain]", () => {
         id: "existing.com",
         rootPrivateKey: RANDOM_PRIV_KEY,
         adminPubkey: RANDOM_PRIV_KEY,
-        verifyKey: "existingVerifyKey789",
         verified: true,
         relays: JSON.stringify([
           "wss://relay1.existing.com",
@@ -126,7 +123,6 @@ describe("GET /api/domains/[domain]", () => {
         id: "testdomain.com",
         rootPrivateKey: RANDOM_PRIV_KEY,
         adminPubkey: RANDOM_PRIV_KEY,
-        verifyKey: "testVerifyKey789",
         verified: true,
         relays: JSON.stringify([
           "wss://relay1.test.com",
@@ -151,12 +147,10 @@ describe("GET /api/domains/[domain]", () => {
       domain: "testdomain.com",
       adminPubkey: RANDOM_PRIV_KEY,
       verified: true,
-      verifyKey: "testVerifyKey789",
       relays: ["wss://relay1.test.com", "wss://relay2.test.com"],
       rootPubkey: RANDOM_PUB_KEY,
     });
     expect(data).not.toHaveProperty("rootPrivateKey");
-    expect(data).toHaveProperty("verifyKey");
   });
 
   it("should return 404 for a non-existing domain", async () => {
@@ -210,7 +204,6 @@ describe("PUT /api/domains/[domain]", () => {
         id: mockDomain,
         rootPrivateKey: RANDOM_PRIV_KEY,
         adminPubkey: RANDOM_PUB_KEY,
-        verifyKey: "testVerifyKey789",
         verified: true,
         relays: JSON.stringify(validPayload.relays),
       },
@@ -347,7 +340,6 @@ describe("DELETE /api/domains/[domain]", () => {
         id: testDomain,
         rootPrivateKey: RANDOM_PRIV_KEY,
         adminPubkey: RANDOM_PUB_KEY,
-        verifyKey: "testVerifyKey789",
         verified: true,
         relays: JSON.stringify([]),
       },

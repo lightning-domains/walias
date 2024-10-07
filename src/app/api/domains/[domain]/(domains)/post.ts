@@ -1,7 +1,5 @@
 import { DomainsService } from "@/services/domains";
 import { NextRequest, NextResponse } from "next/server";
-import crypto from "crypto";
-
 import debug from "debug";
 import { DomainRegisterSchema } from "@/types/requests/domains";
 import { ErrorResponse } from "@/types/requests/shared";
@@ -9,10 +7,7 @@ import { ErrorResponse } from "@/types/requests/shared";
 export type SuccessResponse = {
   domain: string;
   relays: string[];
-  adminPubkey: string;
-  rootPubkey: string | null;
-  verifyUrl?: string;
-  verifyContent?: string;
+  verifyUrl: string;
 };
 
 const log = debug("app:api:domains:post");
@@ -45,21 +40,18 @@ export async function POST(
       );
     }
 
-    let { relays, adminPubkey, rootPrivkey } = parseResult.data;
+    let { relays } = parseResult.data;
 
     // Check if domain already exists
     const existingDomain = await domainsService.findDomainById(domain);
     if (existingDomain) {
       if (!existingDomain.verified) {
-        const verifyUrl = `https://${domain}/.well-known/${existingDomain.verifyKey}`;
+        const verifyUrl = `https://${domain}/.well-known/walias.json`;
         return NextResponse.json(
           {
             domain: existingDomain.domain,
             relays,
-            adminPubkey,
-            rootPubkey: existingDomain.rootPubkey,
             verifyUrl,
-            verifyContent: existingDomain.verifyKey,
           } as SuccessResponse,
           { status: 201 }
         );
@@ -69,18 +61,12 @@ export async function POST(
         { status: 409 }
       );
     }
-    // Generate root private key if not provided
-    if (!rootPrivkey) {
-      rootPrivkey = crypto.randomBytes(32).toString("hex");
-    }
 
     try {
       // Create domain using service
       const newDomain = await domainsService.createDomain({
         id: domain,
         relays,
-        adminPubkey,
-        rootPrivkey,
       });
 
       log("Successfully created domain: %s", domain);

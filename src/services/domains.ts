@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import debug from "debug";
-import { isValidDomain, isValidKey } from "@/lib/utils";
+import { isValidDomain } from "@/lib/utils";
 import { getPublicKey } from "nostr-tools";
 
 const log = debug("app:service:domains");
@@ -26,7 +26,6 @@ export class DomainsService {
         domain: domain.id,
         adminPubkey: domain.adminPubkey,
         verified: domain.verified,
-        verifyKey: domain.verifyKey,
         relays: JSON.parse(domain.relays),
         rootPubkey: getPublicKey(Buffer.from(domain.rootPrivateKey, "hex")),
       };
@@ -36,27 +35,9 @@ export class DomainsService {
     }
   }
 
-  async createDomain({
-    id,
-    relays = [],
-    adminPubkey,
-    rootPrivkey,
-  }: {
-    id: string;
-    relays: string[];
-    adminPubkey: string;
-    rootPrivkey: string;
-  }) {
+  async createDomain({ id, relays = [] }: { id: string; relays: string[] }) {
     try {
       id = id.trim().toLowerCase();
-
-      if (!isValidKey(adminPubkey)) {
-        throw new Error("Invalid adminPubkey");
-      }
-
-      if (!isValidKey(rootPrivkey)) {
-        throw new Error("Invalid rootPrivkey");
-      }
 
       if (!isValidDomain(id)) {
         throw new Error("Invalid domain name");
@@ -64,39 +45,23 @@ export class DomainsService {
 
       log("Creating domain with id: %s", id);
 
-      const verifyKey = crypto.randomBytes(16).toString("hex");
+      const rootPrivkey = crypto.randomBytes(32).toString("hex");
 
       const createData = {
         id,
         rootPrivateKey: rootPrivkey,
-        adminPubkey,
-        verifyKey,
         relays: JSON.stringify(relays),
         verified: false,
-        // waliases: {
-        //   create: [
-        //     {
-        //       name: "_",
-        //       pubkey: getPublicKey(Buffer.from(rootPrivkey, "hex")),
-        //       domainId: id,
-        //     },
-        //     {
-        //       name: "admin",
-        //       pubkey: adminPubkey,
-        //       domainId: id,
-        //     },
-        //   ],
-        // },
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-
-      log("Attempting to create domain with data: %O", id);
-      const newDomain = await this.prisma.domain.create({ data: createData });
+      log("Attempting to create domain with data: %O", createData);
+      const newDomain = await this.prisma.domain.create({
+        data: createData,
+      });
 
       if (!newDomain) {
         log("Failed to create domain: %O", createData);
-
         throw new Error("Failed to create domain");
       }
 
@@ -105,10 +70,7 @@ export class DomainsService {
       return {
         domain: newDomain.id,
         relays: JSON.parse(newDomain.relays),
-        adminPubkey: newDomain.adminPubkey,
-        rootPubkey: rootPrivkey,
-        verifyUrl: `https://${id}/.well-known/${verifyKey}`,
-        verifyContent: verifyKey,
+        verifyUrl: `https://${id}/.well-known/walias.json`,
       };
     } catch (error) {
       log("Error while creating domain %s: %O", id, (error as Error).message);
@@ -199,7 +161,7 @@ export class DomainsService {
       }
 
       // Construct the verifyUrl
-      const verifyUrl = `https://${domain}/.well-known/${domainInfo.verifyKey}`;
+      const verifyUrl = `https://${domain}/.well-known/walias.json`;
 
       // Fetch the content from the verifyUrl
       log("Fetching content from %s", verifyUrl);
@@ -209,10 +171,10 @@ export class DomainsService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const fetchedContent = (await response.text()).trim();
+      const fetchedContent = await response.json();
 
-      // Compare the fetched content with the expected verifyContent
-      if (fetchedContent === domainInfo.verifyKey) {
+      // Compare the fetched content with the expected content
+      if (fetchedContent.rootPubkey === domainInfo.rootPubkey) {
         // If the content matches, update the domain as verified
         log("Verification content matched for domain %s", domain);
         await this.updateDomain(domain, { verified: true });

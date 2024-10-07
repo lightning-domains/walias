@@ -35,8 +35,7 @@ model Domain {
   id             String   @id @unique
   waliases       Walias[]
   rootPrivateKey String
-  adminPubkey    String
-  verifyKey      String
+  adminPubkey    String?
   verified       Boolean  @default(false)
   relays         String   @default("[]")
   createdAt      DateTime @default(now())
