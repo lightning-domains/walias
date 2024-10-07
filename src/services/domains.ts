@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import crypto from "crypto";
 import debug from "debug";
-import { isValidDomain } from "@/lib/utils";
+import { isValidDomain, isValidKey } from "@/lib/utils";
 import { getPublicKey } from "nostr-tools";
 
 const log = debug("app:service:domains");
@@ -173,15 +173,24 @@ export class DomainsService {
 
       const fetchedContent = await response.json();
 
-      // Compare the fetched content with the expected content
-      if (fetchedContent.rootPubkey === domainInfo.rootPubkey) {
-        // If the content matches, update the domain as verified
-        log("Verification content matched for domain %s", domain);
-        await this.updateDomain(domain, { verified: true });
+      // Check if the fetched content has the adminPubkey property and it's a valid 32-byte hex
+      if (
+        fetchedContent.adminPubkey &&
+        isValidKey(fetchedContent.adminPubkey)
+      ) {
+        // If the content is valid, update the domain with the new adminPubkey and set as verified
+        log("Valid adminPubkey found for domain %s", domain);
+        await this.updateDomain(domain, {
+          adminPubkey: fetchedContent.adminPubkey,
+          verified: true,
+        });
         return { verified: true, alreadyVerified: false };
       } else {
-        // If the content doesn't match, verification failed
-        log("Verification failed for domain %s", domain);
+        // If the content is invalid, verification failed
+        log(
+          "Verification failed for domain %s: Invalid or missing adminPubkey",
+          domain
+        );
         return { verified: false, alreadyVerified: false };
       }
     } catch (error) {

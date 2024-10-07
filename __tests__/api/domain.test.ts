@@ -9,6 +9,7 @@ import {
   PUT,
   DELETE,
 } from "../../src/app/api/domains/[domain]/(domains)/route";
+import { POST as POST_VERIFY } from "../../src/app/api/domains/[domain]/(domains)/verify/route";
 
 let prisma: PrismaClient;
 
@@ -94,7 +95,7 @@ describe("POST /api/domains/[domain]", () => {
     expect(res.status).toBe(409);
   });
 
-  it("should return 400 for an invalid domain name", async () => {
+  it("should return 400 for an Invalid domain name", async () => {
     const invalidDomain = "invalid domain.com";
     const req = new NextRequest(
       `http://localhost:3000/api/domains/${invalidDomain}`,
@@ -403,5 +404,166 @@ describe("DELETE /api/domains/[domain]", () => {
     expect(responseBody).toEqual({
       reason: "Domain not found",
     });
+  });
+});
+
+describe("POST /api/domains/[domain]/verify", () => {
+  it("should verify a domain successfully", async () => {
+    // Create a test domain
+    const testDomain = "verify-test.com";
+    await prisma.domain.create({
+      data: {
+        id: testDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verified: false,
+        relays: JSON.stringify([]),
+      },
+    });
+
+    // Mock the fetch function
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ adminPubkey: RANDOM_PUB_KEY }),
+    });
+
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/${testDomain}/verify`,
+      {
+        method: "POST",
+      }
+    );
+
+    const response = await POST_VERIFY(req, { params: { domain: testDomain } });
+
+    expect(response.status).toBe(200);
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      success: true,
+      domain: testDomain,
+      relays: [],
+      adminPubkey: RANDOM_PUB_KEY,
+      rootPubkey: expect.any(String),
+    });
+
+    // Verify that the domain was updated in the database
+    const updatedDomain = await prisma.domain.findUnique({
+      where: { id: testDomain },
+    });
+    expect(updatedDomain?.verified).toBe(true);
+  });
+
+  it("should return 208 if domain is already verified", async () => {
+    const verifiedDomain = "already-verified.com";
+    await prisma.domain.create({
+      data: {
+        id: verifiedDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verified: true,
+        relays: JSON.stringify([]),
+      },
+    });
+
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/${verifiedDomain}/verify`,
+      {
+        method: "POST",
+      }
+    );
+
+    const response = await POST_VERIFY(req, {
+      params: { domain: verifiedDomain },
+    });
+
+    expect(response.status).toBe(208);
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      success: true,
+      domain: verifiedDomain,
+      relays: [],
+      adminPubkey: RANDOM_PUB_KEY,
+      rootPubkey: expect.any(String),
+    });
+  });
+
+  it("should return 404 if domain is not found", async () => {
+    const nonExistentDomain = "non-existent-domain.com";
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/${nonExistentDomain}/verify`,
+      {
+        method: "POST",
+      }
+    );
+
+    const response = await POST_VERIFY(req, {
+      params: { domain: nonExistentDomain },
+    });
+
+    expect(response.status).toBe(404);
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      reason: "Domain not found",
+    });
+  });
+
+  it("should return 400 for an invalid domain name", async () => {
+    const invalidDomain = "invalid domain.com";
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/${invalidDomain}/verify`,
+      {
+        method: "POST",
+      }
+    );
+
+    const response = await POST_VERIFY(req, {
+      params: { domain: invalidDomain },
+    });
+
+    expect(response.status).toBe(400);
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      reason: "Invalid domain name",
+    });
+  });
+
+  it("should return 409 if verification fails", async () => {
+    const testDomain = "failed-verify-test.com";
+    await prisma.domain.create({
+      data: {
+        id: testDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verified: false,
+        relays: JSON.stringify([]),
+      },
+    });
+
+    // Mock the fetch function to simulate verification failure
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ adminPubkey: "invalid_pubkey" }),
+    });
+
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/${testDomain}/verify`,
+      {
+        method: "POST",
+      }
+    );
+
+    const response = await POST_VERIFY(req, { params: { domain: testDomain } });
+
+    expect(response.status).toBe(409);
+    const responseData = await response.json();
+    expect(responseData).toEqual({
+      reason: "Validation failed",
+    });
+
+    // Verify that the domain was not updated in the database
+    const updatedDomain = await prisma.domain.findUnique({
+      where: { id: testDomain },
+    });
+    expect(updatedDomain?.verified).toBe(false);
   });
 });
