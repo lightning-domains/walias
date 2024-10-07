@@ -237,6 +237,7 @@ describe("PUT /api/domains/[domain]", () => {
       relays: validPayload.relays,
       adminPubkey: validPayload.adminPubkey,
       rootPubkey: expect.any(String), // The public key derived from rootPrivkey
+      verified: true,
     });
 
     // Verify the domain was actually updated in the database
