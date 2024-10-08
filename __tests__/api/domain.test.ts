@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { execSync } from "child_process";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
+import { getPublicKey } from "nostr-tools";
 
 import {
   GET,
@@ -408,7 +409,7 @@ describe("DELETE /api/domains/[domain]", () => {
 });
 
 describe("POST /api/domains/[domain]/verify", () => {
-  it("should verify a domain successfully", async () => {
+  it("should verify a domain successfully and create _ and admin waliases", async () => {
     // Create a test domain
     const testDomain = "verify-test.com";
     await prisma.domain.create({
@@ -451,6 +452,21 @@ describe("POST /api/domains/[domain]/verify", () => {
       where: { id: testDomain },
     });
     expect(updatedDomain?.verified).toBe(true);
+
+    // Verify that the _ and admin waliases were created
+    const rootWalias = await prisma.walias.findUnique({
+      where: { id: `_@${testDomain}` },
+    });
+    expect(rootWalias).not.toBeNull();
+    expect(rootWalias?.pubkey).toBe(
+      getPublicKey(Buffer.from(RANDOM_PRIV_KEY, "hex"))
+    );
+
+    const adminWalias = await prisma.walias.findUnique({
+      where: { id: `admin@${testDomain}` },
+    });
+    expect(adminWalias).not.toBeNull();
+    expect(adminWalias?.pubkey).toBe(RANDOM_PUB_KEY);
   });
 
   it("should return 208 if domain is already verified", async () => {
