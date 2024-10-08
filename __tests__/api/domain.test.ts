@@ -200,6 +200,7 @@ describe("PUT /api/domains/[domain]", () => {
 
   beforeEach(async () => {
     // Clear the database and create a test domain before each test
+    await prisma.walias.deleteMany();
     await prisma.domain.deleteMany();
     await prisma.domain.create({
       data: {
