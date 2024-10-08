@@ -332,6 +332,42 @@ describe("PUT /api/domains/[domain]", () => {
     expect(responseBody).toHaveProperty("reason");
     expect(responseBody.reason).toContain("Invalid input");
   });
+
+  it("should update waliases when admin or root pubkeys change", async () => {
+    const newAdminPubkey = RANDOM_PRIV_KEY;
+    const newRootPrivkey = RANDOM_PUB_KEY;
+    const newRootPubkey = getPublicKey(Buffer.from(newRootPrivkey, "hex"));
+
+    const response = await PUT(
+      new NextRequest(`http://localhost/api/domains/${mockDomain}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-authenticated-pubkey": RANDOM_PUB_KEY,
+        },
+        body: JSON.stringify({
+          adminPubkey: newAdminPubkey,
+          rootPrivkey: newRootPrivkey,
+        }),
+      }),
+      { params: { domain: mockDomain } }
+    );
+
+    expect(response.status).toBe(200);
+
+    // Check if waliases were updated
+    const adminWalias = await prisma.walias.findUnique({
+      where: { id: `admin@${mockDomain}` },
+    });
+    expect(adminWalias).not.toBeNull();
+    expect(adminWalias?.pubkey).toBe(newAdminPubkey);
+
+    const rootWalias = await prisma.walias.findUnique({
+      where: { id: `_@${mockDomain}` },
+    });
+    expect(rootWalias).not.toBeNull();
+    expect(rootWalias?.pubkey).toBe(newRootPubkey);
+  });
 });
 
 describe("DELETE /api/domains/[domain]", () => {

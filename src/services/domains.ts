@@ -9,9 +9,11 @@ const log = debug("app:service:domains");
 
 export class DomainsService {
   private prisma: PrismaClient;
+  private waliasService: WaliasService;
 
   constructor() {
     this.prisma = new PrismaClient();
+    this.waliasService = new WaliasService();
   }
 
   async findDomainById(id: string) {
@@ -102,6 +104,15 @@ export class DomainsService {
 
       log("Updating domain with id: %s", id);
 
+      // Fetch the current domain data
+      const currentDomain = await this.prisma.domain.findUnique({
+        where: { id },
+      });
+
+      if (!currentDomain) {
+        throw new Error("Domain not found");
+      }
+
       const updatedDomain = await this.prisma.domain.update({
         where: { id },
         data: {
@@ -113,13 +124,30 @@ export class DomainsService {
         },
       });
 
+      // Check if admin pubkey has changed
+      if (adminPubkey && adminPubkey !== currentDomain.adminPubkey) {
+        await this.waliasService.upsertWalias("admin", id, {
+          pubkey: adminPubkey,
+        });
+      }
+
+      // Check if root private key has changed
+      if (rootPrivkey && rootPrivkey !== currentDomain.rootPrivateKey) {
+        const newRootPubkey = getPublicKey(Buffer.from(rootPrivkey, "hex"));
+        await this.waliasService.upsertWalias("_", id, {
+          pubkey: newRootPubkey,
+        });
+      }
+
       log("Successfully updated domain: %s", id);
 
       return {
         domain: updatedDomain.id,
         relays: JSON.parse(updatedDomain.relays),
         adminPubkey: updatedDomain.adminPubkey,
-        rootPubkey: updatedDomain.rootPrivateKey,
+        rootPubkey: getPublicKey(
+          Buffer.from(updatedDomain.rootPrivateKey, "hex")
+        ),
         verified: updatedDomain.verified,
       };
     } catch (error) {
@@ -187,11 +215,10 @@ export class DomainsService {
         });
 
         // Upsert Walias for root and admin
-        const waliasService = new WaliasService();
-        await waliasService.upsertWalias("_", domain, {
+        await this.waliasService.upsertWalias("_", domain, {
           pubkey: domainInfo.rootPubkey,
         });
-        await waliasService.upsertWalias("admin", domain, {
+        await this.waliasService.upsertWalias("admin", domain, {
           pubkey: fetchedContent.adminPubkey,
         });
 
