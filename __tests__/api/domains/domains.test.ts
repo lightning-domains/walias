@@ -9,8 +9,8 @@ import {
   POST,
   PUT,
   DELETE,
-} from "../../src/app/api/domains/[domain]/(domains)/route";
-import { POST as POST_VERIFY } from "../../src/app/api/domains/[domain]/(domains)/verify/route";
+} from "../../../src/app/api/domains/[domain]/(domains)/route";
+import { POST as POST_VERIFY } from "../../../src/app/api/domains/[domain]/(domains)/verify/route";
 
 let prisma: PrismaClient;
 
