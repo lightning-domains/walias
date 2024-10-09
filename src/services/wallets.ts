@@ -7,7 +7,7 @@ const log = debug("app:service:wallets");
 export type WalletData = {
   id?: string;
   lastEventId?: string;
-  config: string;
+  config: Record<string, unknown>;
   provider: string;
   pubkey: string;
   waliasId: string;
@@ -32,7 +32,7 @@ export class WalletsService {
         data: {
           id,
           lastEventId: data.lastEventId,
-          config: data.config,
+          config: JSON.stringify(data.config),
           provider: data.provider,
           pubkey: data.pubkey,
           waliasId: data.waliasId,
@@ -48,7 +48,11 @@ export class WalletsService {
   async findWalletById(id: string): Promise<Wallet | null> {
     try {
       log("Looking up wallet by id: %s", id);
-      return await this.prisma.wallet.findUnique({ where: { id } });
+      const wallet = await this.prisma.wallet.findUnique({ where: { id } });
+      if (wallet) {
+        wallet.config = JSON.parse(wallet.config);
+      }
+      return wallet;
     } catch (error) {
       log("Error while looking up wallet by id %s: %O", id, error);
       throw error;
@@ -58,15 +62,17 @@ export class WalletsService {
   async updateWallet(id: string, data: Partial<WalletData>): Promise<Wallet> {
     try {
       log("Updating wallet with id: %s", id);
-      return await this.prisma.wallet.update({
+      const wallet = await this.prisma.wallet.update({
         where: { id },
         data: {
           lastEventId: data.lastEventId,
-          config: data.config,
+          config: JSON.stringify(data.config),
           provider: data.provider,
           priority: data.priority,
         },
       });
+      wallet.config = JSON.parse(wallet.config);
+      return wallet;
     } catch (error) {
       log("Error while updating wallet with id %s: %O", id, error);
       throw error;
