@@ -1,39 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import debug from "debug";
-import { UsersService } from "@/services/users";
-import { WaliasService } from "@/services/waliases";
-const log = debug("app:user-wallets-endpoints");
+import { WalletsService } from "@/services/wallets";
+import { DomainsService } from "@/services/domains";
+import { ErrorResponse } from "@/types/requests/shared";
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { domain: string; pubkey: string } }
 ) {
-  try {
-    const usersService = new UsersService();
-    const waliasService = new WaliasService();
+  const authenticatedPubkey = request.headers.get("x-authenticated-pubkey");
 
-    const { domain, pubkey } = params;
-
-    log("Fetching wallets for pubkey: %s in domain: %s", pubkey, domain);
-
-    const user = await usersService.findUserByPubkey(pubkey);
-
-    if (!user) {
-      log("User not found for pubkey: %s", pubkey);
-      return NextResponse.json({ reason: "User not found" }, { status: 404 });
-    }
-
-    const walias = await waliasService.findWaliasesByDomain(domain, pubkey);
-
-    return NextResponse.json({
-      names: walias.map((w) => w.name),
-      relays: user.relays,
-    });
-  } catch (error) {
-    log("Error while fetching wallets: %O", error);
-    return NextResponse.json(
-      { reason: "Internal server error" },
-      { status: 500 }
+  if (!authenticatedPubkey || authenticatedPubkey !== params.pubkey) {
+    return NextResponse.json<ErrorResponse>(
+      { reason: "Unauthorized" },
+      { status: 401 }
     );
   }
+  const { domain, pubkey } = params;
+
+  const domainsService = new DomainsService();
+  const walletsService = new WalletsService();
+
+  const domainDoc = await domainsService.findDomainById(domain);
+  if (!domainDoc) {
+    return NextResponse.json<ErrorResponse>(
+      { reason: "Domain not found" },
+      { status: 404 }
+    );
+  }
+
+  const wallets = await walletsService.findWalletsByPubkey(pubkey);
+
+  return NextResponse.json(wallets);
 }
