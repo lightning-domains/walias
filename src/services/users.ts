@@ -58,12 +58,9 @@ export class UsersService {
         create: {
           pubkey,
           relays: JSON.stringify(relays),
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         update: {
           relays: JSON.stringify(relays),
-          updatedAt: new Date(),
         },
       });
 
