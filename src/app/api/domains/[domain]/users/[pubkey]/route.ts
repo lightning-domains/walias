@@ -23,10 +23,7 @@ export async function GET(
       return NextResponse.json({ reason: "User not found" }, { status: 404 });
     }
 
-    const waliases = await waliasService.findWaliasesByPubkeyAndDomain(
-      pubkey,
-      domain
-    );
+    const waliases = await waliasService.findWaliasesByDomain(domain, pubkey);
 
     return NextResponse.json({
       names: waliases.map((w) => w.name),
@@ -83,10 +80,7 @@ export async function PUT(
     log("Updating user data for pubkey: %s in domain: %s", pubkey, domain);
 
     const updatedUser = await usersService.updateUserRelays(pubkey, relays);
-    const waliases = await waliasService.findWaliasesByPubkeyAndDomain(
-      pubkey,
-      domain
-    );
+    const waliases = await waliasService.findWaliasesByDomain(domain, pubkey);
 
     return NextResponse.json({
       names: waliases.map((w) => w.name),
