@@ -15,3 +15,9 @@ export interface LNURLResponse {
   accountPubKey?: string;
   federationId?: string;
 }
+
+export interface LNURLPayCallbackResponse {
+  pr: string;
+  routes?: any[];
+  verify?: string;
+}
