@@ -37,9 +37,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  execSync(`rm ${testDbUrl}`, {
-    stdio: "inherit",
-  });
+  await prisma.$disconnect();
+  try {
+    execSync(`rm ${testDbUrl}`, {
+      stdio: "inherit",
+    });
+  } catch (error) {
+    console.warn(`Warning: Could not remove test database file: ${error}`);
+  }
 });
 
 describe("POST /api/domains/[domain]", () => {
