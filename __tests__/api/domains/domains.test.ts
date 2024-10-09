@@ -128,6 +128,26 @@ describe("POST /api/domains/[domain]", () => {
     expect(data).toHaveProperty("reason");
     expect(data.reason).toContain("Invalid domain name");
   });
+
+  it("should return 400 for an invalid relay url", async () => {
+    const invalidDomain = "invalid domain.com";
+    const req = new NextRequest(
+      `http://localhost:3000/api/domains/newdomain.com`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          relays: "INVALID RELAYS FORMAT",
+          adminPubkey: RANDOM_PRIV_KEY,
+        }),
+      }
+    );
+    const res = await POST(req, { params: { domain: invalidDomain } });
+
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data).toHaveProperty("reason");
+    expect(data.reason).toContain("Invalid input");
+  });
 });
 
 describe("GET /api/domains/[domain]", () => {
