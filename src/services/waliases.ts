@@ -135,12 +135,11 @@ export class WaliasService {
           where: { id: waliasId },
           update: {
             pubkey: data.pubkey,
-            updatedAt: new Date(),
           },
           create: {
             id: waliasId,
             name,
-            domainId, // Use domainId directly as it's a String in your schema
+            domainId,
             pubkey: data.pubkey,
           },
         });
