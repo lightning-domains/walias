@@ -2,19 +2,24 @@ import { NextRequest } from "next/server";
 import { execSync } from "child_process";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
+import crypto from "crypto";
 
 import { GET, PUT } from "../../../src/app/api/users/[pubkey]/route";
 
 let prisma: PrismaClient;
+let testDbUrl: string;
 
 const RANDOM_PUB_KEY =
   "92763cc6af957acc8159c3d0fbcd9f00e20b4222c1dcff07107190ff5f3667d8";
 const RANDOM_PUB_KEY2 =
   "12763cc6af957acc8159c3d0fbcd9f00e20b4222c1dcff07107190ff5f3667d1";
 
-const testDbUrl = `${path.join(__dirname, "../../../prisma/test.db")}`;
-
 beforeAll(async () => {
+  // Generate a unique database file name for each test run
+  const randomString = crypto.randomBytes(8).toString("hex");
+  const uniqueDbName = `test-${randomString}.db`;
+  testDbUrl = `${path.join(__dirname, "../../../prisma/", uniqueDbName)}`;
+
   // Set up the test database
   process.env.DATABASE_URL = `file:${testDbUrl}`;
 
@@ -27,10 +32,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await prisma.$disconnect();
+
   try {
-    execSync(`rm ${testDbUrl}`, {
-      stdio: "inherit",
-    });
+    if (testDbUrl) {
+      execSync(`rm ${testDbUrl}`, {
+        stdio: "inherit",
+      });
+    }
   } catch (error) {
     console.warn(`Warning: Could not remove test database file: ${error}`);
   }
