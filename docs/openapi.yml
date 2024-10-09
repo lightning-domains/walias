@@ -1016,6 +1016,54 @@ paths:
               example:
                 status: "ERROR"
                 reason: "Wallet not found"
+  /users/{pubkey}:
+    get:
+      tags:
+        - User
+      summary: Get user information
+      parameters:
+        - name: pubkey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+    put:
+      tags:
+        - User
+      summary: Update user information
+      parameters:
+        - name: pubkey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid input
+        "404":
+          description: User not found
+
 components:
   securitySchemes:
     NostrAuth:
@@ -1202,3 +1250,23 @@ components:
         rootPubkey: "5fd91f1dca2dcd5fc89e7208d1e5059f0bac0870d63fc3bac21c7a9388fa18fh"
         verified: false
         verifyUrl: "https://unverified.com/.well-known/walias.json"
+    User:
+      type: object
+      properties:
+        pubkey:
+          type: string
+        name:
+          type: string
+        about:
+          type: string
+        picture:
+          type: string
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        about:
+          type: string
+        picture:
+          type: string
