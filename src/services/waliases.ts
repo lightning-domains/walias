@@ -1,151 +1,89 @@
-import { PrismaClient, Walias } from "@prisma/client";
-import debug from "debug";
 import { isValidKey } from "@/lib/utils";
-import { Prisma } from "@prisma/client";
+import { Prisma, PrismaClient, Walias } from "@prisma/client";
+import debug from "debug";
 
-const log = debug("app:service:waliases");
-
-export type WaliasData = { name: string; domainId: string; pubkey: string };
+const log = debug("app:service:walias");
 
 export class WaliasService {
   private prisma: PrismaClient;
+
   constructor() {
     this.prisma = new PrismaClient();
   }
 
-  async findWaliasById(id: string): Promise<Walias | null> {
+  async findWaliasByName(name: string, domain: string) {
     try {
-      log("Looking up walias by id: %s", id);
-      return await this.prisma.walias.findUnique({ where: { id } });
-    } catch (error) {
-      log("Error while looking up walias by id %s: %O", id, error);
-      throw error;
-    }
-  }
-
-  async createWalias({ name, domainId, pubkey }: WaliasData): Promise<Walias> {
-    try {
-      log("Creating walias with name: %s", name);
-
-      const newWalias = await this.prisma.walias.create({
-        data: {
-          id: `${name}@${domainId}`.toLowerCase().trim(),
-          name,
-          domainId,
-          pubkey,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      log("Looking up walias by name: %s in domain: %s", name, domain);
+      const walias = await this.prisma.walias.findUnique({
+        where: { id: `${name}@${domain}` },
       });
-
-      log("Successfully created walias: %s", name);
-      return newWalias;
+      return walias;
     } catch (error) {
-      log("Error while creating walias %s: %O", name, error);
-      throw error;
-    }
-  }
-
-  async updateWaliasByNameAndDomain({
-    name,
-    domainId,
-    pubkey,
-  }: WaliasData): Promise<Walias> {
-    try {
-      log("Updating walias with name: %s and domainId: %s", name, domainId);
-
-      const updatedWalias = await this.prisma.walias.update({
-        where: {
-          id: `${name}@${domainId}`.toLowerCase().trim(),
-        },
-        data: {
-          pubkey: pubkey || undefined,
-          updatedAt: new Date(),
-        },
-      });
-
       log(
-        "Successfully updated walias with name: %s and domainId: %s",
+        "Error while looking up walias %s in domain %s: %O",
         name,
-        domainId
+        domain,
+        error
       );
+      throw error;
+    }
+  }
+
+  async deleteWalias(name: string, domain: string) {
+    try {
+      log("Deleting walias: %s in domain: %s", name, domain);
+      await this.prisma.walias.delete({
+        where: { id: `${name}@${domain}` },
+      });
+      log("Successfully deleted walias: %s in domain: %s", name, domain);
+    } catch (error) {
+      log(
+        "Error while deleting walias %s in domain %s: %O",
+        name,
+        domain,
+        error
+      );
+      throw error;
+    }
+  }
+
+  async updateWalias(name: string, domain: string, pubkey: string) {
+    try {
+      log("Updating walias: %s in domain: %s", name, domain);
+      const updatedWalias = await this.prisma.walias.update({
+        where: { id: `${name}@${domain}` },
+        data: { pubkey },
+      });
+      log("Successfully updated walias: %s in domain: %s", name, domain);
       return updatedWalias;
     } catch (error) {
       log(
-        "Error while updating walias with name %s and domainId %s: %O",
+        "Error while updating walias %s in domain %s: %O",
         name,
-        domainId,
+        domain,
         error
       );
       throw error;
     }
   }
 
-  async updateWaliasById(
-    id: string,
-    { name, domainId, pubkey }: Partial<WaliasData>
-  ): Promise<Walias> {
+  async findWaliasesByDomain(domain: string, pubkey?: string) {
     try {
-      log("Updating walias with id: %s", id);
-
-      const updatedWalias = await this.prisma.walias.update({
-        where: { id },
-        data: {
-          name: name || undefined,
-          domainId: domainId || undefined,
-          pubkey: pubkey || undefined,
-          updatedAt: new Date(),
-        },
+      log("Finding waliases for domain: %s", domain);
+      const whereClause: { domainId: string; pubkey?: string } = {
+        domainId: domain,
+      };
+      if (pubkey) {
+        whereClause.pubkey = pubkey;
+        log("Filtering waliases by pubkey: %s", pubkey);
+      }
+      const waliases = await this.prisma.walias.findMany({
+        where: whereClause,
       });
-
-      log("Successfully updated walias with id: %s", id);
-      return updatedWalias;
+      log("Found %d waliases for domain: %s", waliases.length, domain);
+      return waliases;
     } catch (error) {
-      log("Error while updating walias with id %s: %O", id, error);
-      throw error;
-    }
-  }
-
-  async findWaliasesByPubkeyAndDomain(
-    pubkey: string,
-    domainId: string
-  ): Promise<Walias[]> {
-    try {
-      log(
-        "Looking up waliases for pubkey: %s and domainId: %s",
-        pubkey,
-        domainId
-      );
-      return await this.prisma.walias.findMany({
-        where: { pubkey, domainId },
-      });
-    } catch (error) {
-      log(
-        "Error while looking up waliases for pubkey %s and domainId %s: %O",
-        pubkey,
-        domainId,
-        error
-      );
-      throw error;
-    }
-  }
-
-  async findWaliasByNameAndDomain(
-    name: string,
-    domainId: string
-  ): Promise<Walias | null> {
-    try {
-      log("Looking up walias by name and domain: %s@%s", name, domainId);
-      return await this.prisma.walias.findUnique({
-        where: { id: `${name}@${domainId}`.toLowerCase().trim() },
-      });
-    } catch (error) {
-      log(
-        "Error while looking up walias by name and domain %s@%s: %O",
-        name,
-        domainId,
-        error
-      );
+      log("Error while finding waliases for domain %s: %O", domain, error);
       throw error;
     }
   }
@@ -230,17 +168,6 @@ export class WaliasService {
           );
         }
       }
-      throw error;
-    }
-  }
-
-  async deleteWalias(id: string): Promise<void> {
-    try {
-      log("Deleting walias with id: %s", id);
-      await this.prisma.walias.delete({ where: { id } });
-      log("Successfully deleted walias with id: %s", id);
-    } catch (error) {
-      log("Error while deleting walias with id %s: %O", id, error);
       throw error;
     }
   }

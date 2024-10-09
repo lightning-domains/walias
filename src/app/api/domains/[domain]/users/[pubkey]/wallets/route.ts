@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { WalletsService } from "@/services/wallets";
 import debug from "debug";
+import { UsersService } from "@/services/users";
+import { WaliasService } from "@/services/waliases";
 const log = debug("app:user-wallets-endpoints");
 
 export async function GET(
@@ -8,29 +9,26 @@ export async function GET(
   { params }: { params: { domain: string; pubkey: string } }
 ) {
   try {
-    const walletsService = new WalletsService();
+    const usersService = new UsersService();
+    const waliasService = new WaliasService();
+
     const { domain, pubkey } = params;
-    const authenticatedPubkey = req.headers.get("x-authenticated-pubkey");
-
-    if (!authenticatedPubkey) {
-      return NextResponse.json(
-        { reason: "Authentication required" },
-        { status: 401 }
-      );
-    }
-
-    if (authenticatedPubkey !== pubkey) {
-      return NextResponse.json(
-        { reason: "Invalid authentication" },
-        { status: 403 }
-      );
-    }
 
     log("Fetching wallets for pubkey: %s in domain: %s", pubkey, domain);
 
-    const wallets = await walletsService.findWalletsByPubkey(pubkey);
+    const user = await usersService.findUserByPubkey(pubkey);
 
-    return NextResponse.json(wallets);
+    if (!user) {
+      log("User not found for pubkey: %s", pubkey);
+      return NextResponse.json({ reason: "User not found" }, { status: 404 });
+    }
+
+    const walias = await waliasService.findWaliasesByDomain(domain, pubkey);
+
+    return NextResponse.json({
+      names: walias.map((w) => w.name),
+      relays: user.relays,
+    });
   } catch (error) {
     log("Error while fetching wallets: %O", error);
     return NextResponse.json(
