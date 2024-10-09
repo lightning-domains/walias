@@ -18,7 +18,7 @@ module.exports = {
   },
   setupFiles: ["<rootDir>/jest.setup.js"],
   // Coverage
-  collectCoverage: true,
+  collectCoverage: false,
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   coverageReporters: ["text", "lcov", "clover"],
