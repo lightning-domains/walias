@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { WaliasService } from "@/services/walias";
+import { WaliasService } from "@/services/waliases";
 import debug from "debug";
 import { ErrorResponse } from "@/types/requests/shared";
 import { WaliasUpdateSchema } from "@/types/requests/waliases";
