@@ -12,22 +12,21 @@ const RANDOM_PUB_KEY =
 const RANDOM_PUB_KEY2 =
   "12763cc6af957acc8159c3d0fbcd9f00e20b4222c1dcff07107190ff5f3667d1";
 
-const testDbUrl = `file:${path.join(__dirname, "../../../prisma/test.db")}`;
+const testDbUrl = `${path.join(__dirname, "../../../prisma/test.db")}`;
 
 beforeAll(async () => {
   // Set up the test database
-  process.env.DATABASE_URL = testDbUrl;
+  process.env.DATABASE_URL = `file:${testDbUrl}`;
 
   execSync("pnpm prisma migrate deploy", {
     stdio: "inherit",
-    env: { ...process.env, DATABASE_URL: testDbUrl },
+    env: process.env,
   });
 
   prisma = new PrismaClient();
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
   try {
     execSync(`rm ${testDbUrl}`, {
       stdio: "inherit",
