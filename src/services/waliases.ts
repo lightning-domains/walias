@@ -170,4 +170,35 @@ export class WaliasService {
       throw error;
     }
   }
+
+  // Add these new methods to the WaliasService class
+
+  async getWaliasPayment(verificationId: string, domain: string) {
+    // Implement the logic to fetch the walias payment by verificationId and domain
+    // This is a placeholder implementation
+    // Add your payment fetching logic here
+    return {
+      /* payment data */
+    };
+  }
+
+  async getWaliasWallets(name: string, domain: string) {
+    // Implement the logic to fetch wallets associated with a walias
+    const walias = await this.findWaliasByName(name, domain);
+    if (!walias) return [];
+    // Add your logic to fetch associated wallets here
+    return [
+      /* array of wallets */
+    ];
+  }
+
+  async addWaliasWallet(name: string, domain: string, walletData: any) {
+    // Implement the logic to add a new wallet to a walias
+    const walias = await this.findWaliasByName(name, domain);
+    if (!walias) throw new Error("Walias not found");
+    // Add your logic to create a new wallet and associate it with the walias
+    return {
+      /* newly created wallet data */
+    };
+  }
 }
