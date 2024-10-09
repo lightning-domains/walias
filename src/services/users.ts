@@ -53,15 +53,22 @@ export class UsersService {
     try {
       log("Updating relays for user with pubkey: %s", pubkey);
 
-      const updatedUser = await this.prisma.user.update({
+      const updatedUser = await this.prisma.user.upsert({
         where: { pubkey },
-        data: {
+        create: {
+          pubkey,
+          relays: JSON.stringify(relays),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        update: {
           relays: JSON.stringify(relays),
           updatedAt: new Date(),
         },
       });
 
       log("Successfully updated relays for user: %s", pubkey);
+      updatedUser.relays = JSON.parse(updatedUser.relays);
       return updatedUser;
     } catch (error) {
       log("Error while updating user %s: %O", pubkey, error);
