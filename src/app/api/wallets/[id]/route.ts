@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { WalletService } from "@/services/wallet";
+import { WalletsService } from "@/services/wallets";
 import debug from "debug";
 import { ErrorResponse } from "@/types/requests/shared";
 import { WalletUpdateSchema } from "@/types/requests/wallets";
@@ -11,7 +11,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const walletService = new WalletService();
+  const walletService = new WalletsService();
 
   try {
     const { id } = params;
@@ -40,7 +40,7 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const walletService = new WalletService();
+  const walletService = new WalletsService();
 
   try {
     const { id } = params;
@@ -88,7 +88,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const walletService = new WalletService();
+  const walletService = new WalletsService();
 
   try {
     const { id } = params;
