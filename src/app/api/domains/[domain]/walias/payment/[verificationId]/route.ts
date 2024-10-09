@@ -1,63 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import debug from "debug";
-
-const log = debug("app:walias-payment-verification");
+import { WaliasService } from "@/services/waliases";
+import { DomainsService } from "@/services/domains";
+import { ErrorResponse } from "@/types/requests/shared";
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { domain: string; verificationId: string } }
 ) {
-  try {
-    const { domain, verificationId } = params;
-    log(
-      "Verifying payment for domain: %s, verificationId: %s",
-      domain,
-      verificationId
-    );
+  const { domain, verificationId } = params;
 
-    // Here, you would implement your actual payment verification logic
-    // This might involve checking a database or calling an external payment service
-    // For this example, we'll use a mock implementation
+  const domainsService = new DomainsService();
+  const waliasService = new WaliasService();
 
-    const paymentStatus = await mockCheckPaymentStatus(verificationId);
-
-    if (paymentStatus.settled) {
-      return NextResponse.json({
-        status: "OK",
-        settled: true,
-        preimage: paymentStatus.preimage,
-        pr: paymentStatus.pr,
-      });
-    } else {
-      return NextResponse.json(
-        {
-          status: "OK",
-          settled: false,
-          pr: paymentStatus.pr,
-        },
-        { status: 402 }
-      ); // 402 Payment Required
-    }
-  } catch (error) {
-    log("Error while verifying walias payment: %O", error);
-    return NextResponse.json(
-      {
-        status: "ERROR",
-        reason: "Payment verification failed",
-      },
-      { status: 500 }
+  const domainDoc = await domainsService.findDomainById(domain);
+  if (!domainDoc) {
+    return NextResponse.json<ErrorResponse>(
+      { reason: "Domain not found" },
+      { status: 404 }
     );
   }
-}
 
-// Mock function to simulate payment status check
-async function mockCheckPaymentStatus(verificationId: string) {
-  // In a real implementation, you would check your database or payment service here
-  const settled = Math.random() < 0.5; // Randomly decide if payment is settled
-  return {
-    settled,
-    preimage: settled ? "mocked_preimage_" + verificationId : null,
-    pr:
-      "lnbc1500n1ps36h3hpp5ccp6y5nzn2mzx8kfwef5ulncn8qcnu409" + verificationId,
-  };
+  return NextResponse.json<ErrorResponse>(
+    { reason: "Needs implementation" },
+    { status: 501 }
+  );
+
+  const payment = await waliasService.getWaliasPayment(verificationId, domain);
+  if (!payment) {
+    return NextResponse.json<ErrorResponse>(
+      { reason: "Payment not found" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json(payment);
 }
