@@ -1,3 +1,4 @@
+import { DomainsService } from "./../../../src/services/domains";
 import { NextRequest } from "next/server";
 import { execSync } from "child_process";
 import path from "path";
@@ -454,6 +455,43 @@ describe("DELETE /api/domains/[domain]", () => {
     });
   });
 
+  it("should return 403 when not admin or root", async () => {
+    // Create a test domain
+    const testDomain = "unauthorized-delete.com";
+    await prisma.domain.create({
+      data: {
+        id: testDomain,
+        rootPrivateKey: RANDOM_PRIV_KEY,
+        adminPubkey: RANDOM_PUB_KEY,
+        verified: true,
+        relays: JSON.stringify([]),
+      },
+    });
+
+    // Create a request with a different pubkey
+    const unauthorizedPubkey = "unauthorized_pubkey";
+    const req = new NextRequest(`http://localhost/api/domains/${testDomain}`, {
+      method: "DELETE",
+      headers: {
+        "x-authenticated-pubkey": unauthorizedPubkey,
+      },
+    });
+
+    const response = await DELETE(req, { params: { domain: testDomain } });
+    expect(response.status).toBe(403);
+
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Invalid authentication. Must be admin or root",
+    });
+
+    // Verify the domain was not deleted
+    const existingDomain = await prisma.domain.findUnique({
+      where: { id: testDomain },
+    });
+    expect(existingDomain).not.toBeNull();
+  });
+
   it("should return 404 when trying to delete a non-existent domain", async () => {
     const nonExistentDomain = "non-existent-domain.com";
     const req = new NextRequest(
@@ -475,6 +513,35 @@ describe("DELETE /api/domains/[domain]", () => {
     expect(responseBody).toEqual({
       reason: "Domain not found",
     });
+  });
+
+  it("should return 500 when an internal error occurs", async () => {
+    const testDomain = "error-test.com";
+
+    // Mock DomainsService to throw an error
+    jest
+      .spyOn(DomainsService.prototype, "findDomainById")
+      .mockImplementation(() => {
+        throw new Error("Internal server error");
+      });
+
+    const req = new NextRequest(`http://localhost/api/domains/${testDomain}`, {
+      method: "DELETE",
+      headers: {
+        "x-authenticated-pubkey": RANDOM_PUB_KEY,
+      },
+    });
+
+    const response = await DELETE(req, { params: { domain: testDomain } });
+    expect(response.status).toBe(500);
+
+    const responseBody = await response.json();
+    expect(responseBody).toEqual({
+      reason: "Internal server error",
+    });
+
+    // Restore the original implementation
+    jest.restoreAllMocks();
   });
 });
 
