@@ -77,6 +77,10 @@ Via same `pubkey` from any LaWallet federation.
 
 Requires `read invoice` api key. **`* Alby`**
 
+### Blink
+
+Requires API key
+
 ### LND
 
 LND Api Rest **`* Alby`**
