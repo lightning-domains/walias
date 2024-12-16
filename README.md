@@ -15,18 +15,20 @@ Provide Lightning Address and Nostr functionality to your domain without coding.
 ## Features
 
 - [x] Nostr Login
-- [ ] Wizard installer
+- [x] REST endpoints
+- [x] REST tests
+- [x] Frontend frame
+- [x] User profile page
+- [ ] Connect Frontend with REST Backend
+- [x] Wizard installer front
+- [ ] Wizard installer backend
 - [ ] /.well-known as [Lightning Domain standard](https://github.com/lacrypta/lightning-domains)
 - [ ] [NIP05](https://github.com/nostr-protocol/nips/blob/master/05.md) provider
 - [ ] [LUD16](https://github.com/lnurl/luds/blob/luds/06.md) provider
-- [ ] Multiple domains
 - [ ] Multiple [wallet providers](./docs/WALLET_PROVIDERS.md)
 - [ ] Nostr profile editor
-- [ ] User manager
-- [ ] User profile page
-- [ ] Webhook manager
+- [ ] Triggers
 - [ ] Dashboard feed
-- [ ] Follow users
 - [ ] Nostr inbox
 - [ ] [Email to Nostr](./docs/MAIL_NOSTR.md)
 
